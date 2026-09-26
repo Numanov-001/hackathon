@@ -155,6 +155,10 @@ export function localMarketReply(question, snap) {
   if (/ob[- ]?havo|dasturlash|siyosat|bitcoin|kripto|python|javascript/.test(q)) {
     return "Bu savol sayt tahliliga tegishli emas. Bozor, tanlangan tovar yoki P2P e’lonlari haqida so‘rang.";
   }
+  if (/^(hi|hello|hey|salom|assalomu|qalaysiz)\b/.test(q)) {
+    if (!a) return "Salom. Bozor sahifasida 24 oylik demo oylik o‘rtacha bor. Tovar tanlang — trendini aytaman.";
+    return localMarketReply(`${a.productName} oshayaptimi`, snap);
+  }
   if (/p2p|e[’']lon|sotib|sotish|escrow/.test(q) && !/narx|osh|tush|trend|pomidor|kartoshka/.test(q)) {
     return "P2P — sotib olish/sotish e’lonlari (niyat). Bu yopilgan savdo emas. Filtr: mahsulot, hudud, to‘lov, max narx, min miqdor.";
   }

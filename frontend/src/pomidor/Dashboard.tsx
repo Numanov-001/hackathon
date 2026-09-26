@@ -238,7 +238,7 @@ export default function Dashboard({
           </button>
         ))}
       </nav>
-      {isSignedIn && <SiteAssistant snapshot={buildMarketSnapshot(product, products)} />}
+      {isSignedIn && product && <SiteAssistant snapshot={buildMarketSnapshot(product, products)} />}
       <Toast message={toast} />
     </div>
   );

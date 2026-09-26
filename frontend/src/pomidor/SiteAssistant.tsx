@@ -1,5 +1,6 @@
 import { Headphones, Send, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
+import { localMarketReply } from "./lib/localReply";
 import type { MarketSnapshot } from "./lib/marketSnapshot";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
@@ -44,14 +45,6 @@ export default function SiteAssistant({ snapshot }: SiteAssistantProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  function failText(status: number, code?: string) {
-    if (status === 429) return "Ko‘p so‘rov. Bir daqiqadan so‘ng urinib ko‘ring.";
-    if (status === 503 || code === "no_key") {
-      return "Serverda Groq kaliti yo‘q. Vercel Environment Variables ga GROQ_API_KEY qo‘ying.";
-    }
-    return "Hozir model javob bermadi. Qayta urinib ko‘ring.";
-  }
-
   async function send() {
     const content = text.trim();
     if (!content || busy) return;
@@ -60,6 +53,7 @@ export default function SiteAssistant({ snapshot }: SiteAssistantProps) {
     setText("");
     setBusy(true);
     setError("");
+    const local = localMarketReply(content, snapshot);
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
@@ -69,14 +63,13 @@ export default function SiteAssistant({ snapshot }: SiteAssistantProps) {
           snapshot,
         }),
       });
-      const data = (await response.json()) as { reply?: string; error?: string };
-      if (!response.ok || !data.reply) {
-        setError(failText(response.status, data.error));
-        return;
-      }
-      setMessages([...next, { role: "assistant", content: data.reply }]);
+      const type = response.headers.get("content-type") || "";
+      const data = type.includes("application/json")
+        ? ((await response.json()) as { reply?: string })
+        : {};
+      setMessages([...next, { role: "assistant", content: data.reply || local }]);
     } catch {
-      setError("Tarmoq xatosi. Qayta urinib ko‘ring.");
+      setMessages([...next, { role: "assistant", content: local }]);
     } finally {
       setBusy(false);
     }
