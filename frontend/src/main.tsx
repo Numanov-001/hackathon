@@ -5,9 +5,7 @@ import { clerkAppearance } from "./pomidor/clerkAppearance";
 import Dashboard from "./pomidor/Dashboard";
 import "./styles.css";
 
-const PUBLISHABLE_KEY =
-  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ||
-  "pk_test_YWRhcHRpbmctZHJha2UtNzk4NC5jbGVyay5hY2NvdW50cy5kZXYk";
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "";
 
 function ClerkApp() {
   const { isSignedIn, user } = useUser();

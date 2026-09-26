@@ -31,12 +31,13 @@ pytest tests/test_mvp.py
 ```powershell
 cd frontend
 npm install
+copy .env.example .env
 npm run dev
 ```
 
 UI: http://localhost:5173
 
-Set `ANTHROPIC_API_KEY` in `backend/.env` for Claude. Without a key, chat uses keyword intent fallback.
+The page reads `frontend/.env`. Put `GROQ_API_KEY` there for the assistant. Without it, the assistant still answers from the prices on screen. Clerk and Supabase keys stay in that file and are not committed.
 
 ## Deploy
 
