@@ -1,4 +1,4 @@
-const API = "";
+const API = String(import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 
 async function readError(res) {
   const text = await res.text();
