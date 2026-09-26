@@ -1,88 +1,123 @@
-import { GLYPH, Icon } from "./icons.jsx";
-import { PERFORMANCE, QUOTES, formatPrice } from "./mockData.js";
+import { useState } from "react";
+import { QUOTES, REGIONS, formatPrice } from "./mockData.js";
 
-function signed(value, digits = 2) {
-  const text = new Intl.NumberFormat("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(Math.abs(value));
-  return `${value > 0 ? "+" : value < 0 ? "−" : ""}${text}`;
+function signedPct(value) {
+  const abs = Math.abs(value).toFixed(1);
+  return `${value > 0 ? "+" : value < 0 ? "−" : ""}${abs}%`;
 }
 
-export default function Watchlist({ symbol, onSymbol, onClose }) {
-  const groups = ["Indices", "Stocks", "Futures"];
-  const active = QUOTES.find((item) => item.symbol === symbol) ?? QUOTES.at(-1);
+export default function Watchlist({ symbol, onSymbol, quote, onBuy, onClose }) {
+  const [kg, setKg] = useState("20");
+  const [region, setRegion] = useState("Toshkent");
+  const [when, setWhen] = useState("");
+  const [phone, setPhone] = useState("");
+  const [error, setError] = useState("");
+  const volume = Number(kg);
+  const total = Number.isFinite(volume) && volume > 0 ? volume * quote.last : 0;
+
+  function submit(event) {
+    event.preventDefault();
+    if (!Number.isFinite(volume) || volume < 1) {
+      setError("Kamida 1 kg kiriting.");
+      return;
+    }
+    if (!when) {
+      setError("Olish sanasini tanlang.");
+      return;
+    }
+    const digits = phone.replace(/\D/g, "");
+    if (digits.length < 9) {
+      setError("Telefon raqamini to‘liq yozing.");
+      return;
+    }
+    setError("");
+    onBuy({
+      id: `${Date.now()}-${quote.symbol}`,
+      symbol: quote.symbol,
+      name: quote.name,
+      emoji: quote.emoji,
+      kg: volume,
+      region,
+      when,
+      phone,
+      pricePerKg: quote.last,
+      total,
+      status: "Qabul qilindi",
+      createdAt: new Date().toISOString(),
+    });
+    setKg("20");
+    setPhone("");
+  }
+
   return (
-    <aside className="flex h-full w-full flex-col bg-white" aria-label="Watchlist">
+    <aside className="flex h-full w-full flex-col bg-white" aria-label="Mahsulotlar">
       <div className="flex items-center justify-between border-b border-[#e0e3eb] px-3 py-2">
-        <button type="button" className="flex items-center gap-1 text-[13px] font-medium">
-          Watchlist <Icon d={GLYPH.chevron} className="h-3.5 w-3.5 text-[#787b86]" />
-        </button>
+        <h2 className="text-[13px] font-medium">Mahsulotlar</h2>
         {onClose && (
-          <button type="button" className="text-[12px] text-[#787b86] xl:hidden" onClick={onClose}>Close</button>
+          <button type="button" className="text-[12px] text-[#787b86] xl:hidden" onClick={onClose}>Yopish</button>
         )}
       </div>
-      <div className="grid grid-cols-[1.2fr_0.9fr_0.7fr_0.7fr] px-3 py-1 text-[11px] text-[#787b86]">
-        <span>Symbol</span>
-        <span className="text-right">Last</span>
-        <span className="text-right">Chg</span>
-        <span className="text-right">Chg%</span>
+      <div className="grid grid-cols-[1.4fr_0.9fr_0.8fr] px-3 py-1 text-[11px] text-[#787b86]">
+        <span>Mahsulot</span>
+        <span className="text-right">UZS / kg</span>
+        <span className="text-right">Oy</span>
       </div>
-      <div className="min-h-0 flex-1 overflow-auto">
-        {groups.map((group) => (
-          <section key={group}>
-            <h2 className="px-3 py-1 text-[11px] font-medium tracking-wide text-[#787b86]">{group.toUpperCase()}</h2>
-            <ul>
-              {QUOTES.filter((item) => item.group === group).map((item) => {
-                const up = item.change >= 0;
-                const selected = item.symbol === symbol;
-                return (
-                  <li key={item.symbol}>
-                    <button
-                      type="button"
-                      onClick={() => onSymbol(item.symbol)}
-                      aria-current={selected ? "true" : undefined}
-                      className={`grid w-full grid-cols-[1.2fr_0.9fr_0.7fr_0.7fr] items-center px-3 py-1 text-left text-[12px] hover:bg-[#f0f3fa] ${selected ? "bg-[#f0f3fa]" : ""}`}
-                    >
-                      <span className="flex items-center gap-1.5 font-medium">
-                        <span className="h-2 w-2 rounded-full" style={{ background: item.dot }} />
-                        {item.symbol}
-                      </span>
-                      <span className="tv-num text-right">{formatPrice(item.last, item.symbol)}</span>
-                      <span className={`tv-num text-right ${up ? "text-[#089981]" : "text-[#f23645]"}`}>{signed(item.change, item.symbol === "DXY" ? 3 : 2)}</span>
-                      <span className={`tv-num text-right ${up ? "text-[#089981]" : "text-[#f23645]"}`}>{signed(item.pct)}%</span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        ))}
-        <section className="border-t border-[#e0e3eb] px-3 py-3">
-          <p className="text-[12px] text-[#787b86]">{active.name}{active.exchange ? ` · ${active.exchange}` : ""}</p>
-          <p className="tv-num mt-1 text-[28px] font-semibold leading-none">{formatPrice(active.last, active.symbol)}</p>
-          <p className={`tv-num mt-1 text-[13px] ${active.change >= 0 ? "text-[#089981]" : "text-[#f23645]"}`}>
-            {signed(active.change)} {signed(active.pct)}%
-          </p>
-          <p className="mt-2 text-[12px] text-[#f23645]">Market closed</p>
-          <p className="text-[11px] text-[#787b86]">Last update at 20:59 GMT−5</p>
-          {active.symbol === "NDX" ? (
-            <article className="mt-3 rounded bg-[#f3e8ff] px-2 py-2 text-[12px] leading-snug text-[#131722]">
-              <p className="text-[11px] text-[#787b86]">News · 9 hours ago</p>
-              Wall St set for a higher open as AI enthusiasm eases worries over higher oil prices and yields.
-              <button type="button" className="mt-1 block text-[#2962ff]">More events</button>
-            </article>
-          ) : (
-            <p className="mt-3 text-[12px] text-[#787b86]">No headlines for this symbol.</p>
-          )}
-          <h2 className="mb-2 mt-4 text-[13px] font-medium">Performance</h2>
-          <div className="grid grid-cols-3 gap-1.5">
-            {PERFORMANCE.map(([label, value]) => (
-              <div key={label} className="rounded bg-[#e8f7f3] px-1 py-1 text-center">
-                <div className="text-[10px] text-[#787b86]">{label}</div>
-                <div className="tv-num text-[12px] font-semibold text-[#089981]">{value}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
+      <ul className="min-h-0 flex-1 overflow-auto">
+        {QUOTES.map((item) => {
+          const up = item.change >= 0;
+          const selected = item.symbol === symbol;
+          return (
+            <li key={item.symbol}>
+              <button
+                type="button"
+                onClick={() => onSymbol(item.symbol)}
+                aria-current={selected ? "true" : undefined}
+                className={`grid w-full grid-cols-[1.4fr_0.9fr_0.8fr] items-center px-3 py-1.5 text-left text-[12px] hover:bg-[#f0f3fa] ${selected ? "bg-[#f0f3fa]" : ""}`}
+              >
+                <span className="flex items-center gap-1.5 font-medium">
+                  <span aria-hidden="true">{item.emoji}</span>
+                  {item.name}
+                </span>
+                <span className="tv-num text-right">{formatPrice(item.last)}</span>
+                <span className={`tv-num text-right ${up ? "text-[#089981]" : "text-[#f23645]"}`}>{signedPct(item.pct)}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <section className="border-t border-[#e0e3eb] px-3 py-3">
+        <p className="text-[13px] font-medium">
+          <span aria-hidden="true">{quote.emoji} </span>
+          {quote.name}
+        </p>
+        <p className="tv-num mt-1 text-[24px] font-semibold leading-none">{formatPrice(quote.last)}</p>
+        <p className="mt-1 text-[12px] text-[#787b86]">UZS / kg · stat.uz INI asosida</p>
+        <form className="mt-3 grid gap-2" onSubmit={submit}>
+          <label className="grid gap-1 text-[12px] text-[#787b86]">
+            Hajm (kg)
+            <input type="number" min="1" step="1" value={kg} onChange={(e) => setKg(e.target.value)} className="rounded-md border border-[#e0e3eb] px-2 py-1.5 text-[13px] text-[#131722]" />
+          </label>
+          <label className="grid gap-1 text-[12px] text-[#787b86]">
+            Viloyat
+            <select value={region} onChange={(e) => setRegion(e.target.value)} className="rounded-md border border-[#e0e3eb] px-2 py-1.5 text-[13px] text-[#131722]">
+              {REGIONS.map((item) => <option key={item} value={item}>{item}</option>)}
+            </select>
+          </label>
+          <label className="grid gap-1 text-[12px] text-[#787b86]">
+            Olish sanasi
+            <input type="date" value={when} onChange={(e) => setWhen(e.target.value)} className="rounded-md border border-[#e0e3eb] px-2 py-1.5 text-[13px] text-[#131722]" />
+          </label>
+          <label className="grid gap-1 text-[12px] text-[#787b86]">
+            Telefon
+            <input type="tel" placeholder="+998 90 123 45 67" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-md border border-[#e0e3eb] px-2 py-1.5 text-[13px] text-[#131722]" />
+          </label>
+          <p className="tv-num text-[12px] text-[#131722]">Jami: {formatPrice(total)} UZS</p>
+          {error && <p className="text-[12px] font-semibold text-[#f23645]" role="alert">{error}</p>}
+          <button type="submit" className="rounded-md bg-[#146b43] px-3 py-2 text-[13px] font-semibold text-white hover:bg-[#0f5534]">
+            Sotib olish
+          </button>
+        </form>
+      </section>
     </aside>
   );
 }

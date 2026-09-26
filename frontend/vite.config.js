@@ -8,12 +8,14 @@ export default defineConfig({
     host: true,
     port: 5173,
     watch: {
-      ignored: ["**/.chrome-profile/**", "**/preview-*"],
-    },
-    watch: {
       ignored: ["**/.chrome-profile/**"],
     },
     proxy: {
+      "/siat": {
+        target: "https://siat.stat.uz",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/siat/, ""),
+      },
       "/health": "http://127.0.0.1:8000",
       "/api": "http://127.0.0.1:8000",
       "/ws": {

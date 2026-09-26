@@ -2,23 +2,20 @@ import { useEffect, useRef } from "react";
 import {
   ColorType,
   CrosshairMode,
-  HistogramSeries,
   LastPriceAnimationMode,
   LineSeries,
   LineStyle,
   createChart,
 } from "lightweight-charts";
-import { formatCompact, formatPrice, rangeStart } from "./mockData.js";
+import { rangeStart } from "./mockData.js";
 
 const BLUE = "#4aa3df";
 const PURPLE = "#9b4dca";
 
-export default function PriceChart({ bars, blue, purple, volume, range, symbol, tool, onLegend }) {
+export default function PriceChart({ bars, blue, purple, range, symbol, onLegend }) {
   const host = useRef(null);
   const api = useRef(null);
-  const toolRef = useRef(tool);
   const symbolRef = useRef(symbol);
-  toolRef.current = tool;
   symbolRef.current = symbol;
 
   useEffect(() => {
@@ -42,7 +39,7 @@ export default function PriceChart({ bars, blue, purple, volume, range, symbol, 
       },
       rightPriceScale: {
         borderColor: "#e0e3eb",
-        scaleMargins: { top: 0.06, bottom: 0.22 },
+        scaleMargins: { top: 0.06, bottom: 0.06 },
       },
       timeScale: {
         borderColor: "#e0e3eb",
@@ -72,27 +69,7 @@ export default function PriceChart({ bars, blue, purple, volume, range, symbol, 
       crosshairMarkerRadius: 4,
       lastPriceAnimation: LastPriceAnimationMode.Disabled,
     });
-    const volumeSeries = chart.addSeries(HistogramSeries, {
-      priceScaleId: "",
-      priceFormat: { type: "volume" },
-      lastValueVisible: false,
-      priceLineVisible: false,
-    });
-    const trendSeries = chart.addSeries(LineSeries, {
-      color: "#131722",
-      lineWidth: 1,
-      lineStyle: LineStyle.Dashed,
-      lastValueVisible: false,
-      priceLineVisible: false,
-      crosshairMarkerVisible: false,
-    });
-    chart.priceScale("").applyOptions({ scaleMargins: { top: 0.78, bottom: 0 } });
-
-    const state = { chart, blueSeries, purpleSeries, volumeSeries, trendSeries, clicks: [], guides: [] };
-
-    function barAt(time) {
-      return state.bars?.find((bar) => bar.time === time) ?? null;
-    }
+    const state = { chart, blueSeries, purpleSeries };
 
     function publish(time) {
       const source = state.bars ?? [];
@@ -105,7 +82,6 @@ export default function PriceChart({ bars, blue, purple, volume, range, symbol, 
         price: bar.close,
         change,
         pct: prev ? (change / prev) * 100 : 0,
-        volume: bar.volume,
         blue: state.blueValue ?? null,
       });
     }
@@ -130,54 +106,8 @@ export default function PriceChart({ bars, blue, purple, volume, range, symbol, 
           price: blueValue.value,
           change,
           pct: prev ? (change / prev) * 100 : 0,
-          volume: bar.volume,
           blue: blueValue.value,
         });
-      }
-    });
-
-    chart.subscribeClick((param) => {
-      if (!param.point || !param.time) return;
-      const active = toolRef.current;
-      const price = purpleSeries.coordinateToPrice(param.point.y);
-      if (price == null) return;
-      if (active === "trend" || active === "measure") {
-        state.clicks.push({ time: param.time, value: price });
-        if (state.clicks.length === 2) {
-          const [a, b] = [...state.clicks].sort((left, right) => left.time - right.time);
-          if (active === "trend") trendSeries.setData([a, b]);
-          if (active === "measure") {
-            const delta = b.value - a.value;
-            const pct = a.value ? (delta / a.value) * 100 : 0;
-            onLegend({
-              price: b.value,
-              change: delta,
-              pct,
-              volume: barAt(param.time)?.volume ?? 0,
-              blue: null,
-              note: `Measure ${delta >= 0 ? "+" : ""}${formatPrice(delta, symbolRef.current)} (${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%)`,
-            });
-          }
-          state.clicks = [];
-        }
-      }
-      if (active === "hline") {
-        const line = purpleSeries.createPriceLine({
-          price,
-          color: "#787b86",
-          lineStyle: LineStyle.Dashed,
-          lineWidth: 1,
-          axisLabelVisible: true,
-          title: "",
-        });
-        state.guides.push(line);
-        state.clicks = [];
-      }
-      if (active === "erase") {
-        trendSeries.setData([]);
-        state.guides.forEach((line) => purpleSeries.removePriceLine(line));
-        state.guides = [];
-        state.clicks = [];
       }
     });
 
@@ -194,7 +124,6 @@ export default function PriceChart({ bars, blue, purple, volume, range, symbol, 
     state.bars = bars;
     state.blueSeries.setData(blue);
     state.purpleSeries.setData(purple);
-    state.volumeSeries.setData(volume);
     const from = rangeStart(bars, range);
     const to = bars.at(-1)?.time;
     if (from != null && to != null && from < to) {
@@ -214,18 +143,10 @@ export default function PriceChart({ bars, blue, purple, volume, range, symbol, 
         price: last.close,
         change,
         pct: (change / prev.close) * 100,
-        volume: last.volume,
         blue: blue.at(-1)?.value ?? null,
       });
     }
-  }, [bars, blue, purple, volume, range, onLegend]);
-
-  useEffect(() => {
-    api.current?.chart.applyOptions({
-      crosshair: { mode: tool === "magnet" ? CrosshairMode.Magnet : CrosshairMode.Normal },
-    });
-    if (api.current) api.current.clicks = [];
-  }, [tool]);
+  }, [bars, blue, purple, range, onLegend]);
 
   return <div ref={host} className="h-full w-full" />;
 }
