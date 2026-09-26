@@ -93,39 +93,35 @@ export default function P2PBoard({
     <section className="w-full rounded-[10px] border border-line bg-surface">
       <div className="sticky top-16 z-10 border-b border-line bg-surface px-4 py-4 sm:px-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
+          <div className="flex min-w-0 flex-wrap items-center gap-3">
             <h2 className="text-lg font-semibold text-ink">P2P</h2>
-            <p className="text-[13px] text-muted">
-              {side === "buy" ? "Sotuvchilar, arzonidan qimmatiga." : "Xaridorlar, arzonidan qimmatiga."}{" "}
-              {contacts ? "Telefon orqali bog‘lanasiz." : "Telefon Starter tarifida ochiladi."}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <button type="button" onClick={onPost} className="inline-flex h-10 items-center rounded-[6px] bg-accent px-4 text-sm font-semibold text-on-accent hover:bg-accent-hover">
-              E’lon qo‘yish
-            </button>
-            <div className="flex rounded-[6px] bg-subtle p-1">
-              <button type="button" onClick={() => onSide("buy")} className={cn("min-h-10 rounded-[6px] px-4 text-sm font-semibold transition-colors duration-150", side === "buy" ? "bg-accent text-on-accent" : "text-muted")}>
+            <div className="flex rounded-[6px] bg-subtle p-1" role="group" aria-label="P2P tomoni">
+              <button type="button" onClick={() => onSide("buy")} className={cn("min-h-10 rounded-[6px] px-4 text-sm font-semibold transition-colors duration-150", side === "buy" ? "bg-surface text-ink ring-1 ring-line" : "text-muted")}>
                 Sotib olish
               </button>
-              <button type="button" onClick={() => onSide("sell")} className={cn("min-h-10 rounded-[6px] px-4 text-sm font-semibold transition-colors duration-150", side === "sell" ? "bg-ink text-on-accent" : "text-muted")}>
+              <button type="button" onClick={() => onSide("sell")} className={cn("min-h-10 rounded-[6px] px-4 text-sm font-semibold transition-colors duration-150", side === "sell" ? "bg-surface text-ink ring-1 ring-line" : "text-muted")}>
                 Sotish
               </button>
             </div>
           </div>
+          <button type="button" onClick={onPost} className="inline-flex h-10 items-center rounded-[6px] bg-accent px-4 text-sm font-semibold text-on-accent hover:bg-accent-hover">
+            E’lon qo‘yish
+          </button>
         </div>
+        <p className="mt-2 text-[13px] text-muted">
+          {side === "buy" ? "Sotuvchilar, arzonidan qimmatiga." : "Xaridorlar, arzonidan qimmatiga."}{" "}
+          {contacts ? "Telefon orqali bog‘lanasiz." : "Telefon Starter tarifida ochiladi."}
+        </p>
 
         {postOpen && (
-          <div className="mt-4">
-            <P2PPost
-              products={products}
-              defaultName={posterName}
-              defaultPhone={posterPhone}
-              defaultProductId={productId || products[0]?.id || ""}
-              onClose={onClosePost}
-              onSubmit={onPublish}
-            />
-          </div>
+          <P2PPost
+            products={products}
+            defaultName={posterName}
+            defaultPhone={posterPhone}
+            defaultProductId={productId || products[0]?.id || ""}
+            onClose={onClosePost}
+            onSubmit={onPublish}
+          />
         )}
 
         <div className="relative z-20 mt-4 grid grid-cols-2 gap-3 lg:grid-cols-5">

@@ -24,8 +24,10 @@ export default function Select({
   "aria-label": ariaLabel,
 }: SelectProps) {
   const [open, setOpen] = useState(false);
+  const [dropUp, setDropUp] = useState(false);
   const [query, setQuery] = useState("");
   const root = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const listId = useId();
   const selected = options.find((item) => item.value === value);
@@ -36,21 +38,34 @@ export default function Select({
       if (!root.current?.contains(event.target as Node)) setOpen(false);
     }
     function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape" && open) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        setOpen(false);
+      }
     }
     document.addEventListener("mousedown", onPointer);
-    document.addEventListener("keydown", onKey);
+    document.addEventListener("keydown", onKey, true);
     return () => {
       document.removeEventListener("mousedown", onPointer);
-      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("keydown", onKey, true);
     };
-  }, []);
+  }, [open]);
 
   useEffect(() => {
-    if (open && searchable) {
+    if (!open) return;
+    const box = root.current?.getBoundingClientRect();
+    const scroller = root.current?.closest("[data-scroll-panel]") ?? root.current?.closest("[role='dialog']");
+    const limit = scroller?.getBoundingClientRect().bottom ?? window.innerHeight - 16;
+    const shouldUp = box ? limit - box.bottom < 220 : false;
+    setDropUp(shouldUp);
+    if (searchable) {
       setQuery("");
       window.setTimeout(() => searchRef.current?.focus(), 0);
     }
+    window.requestAnimationFrame(() => {
+      listRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
   }, [open, searchable]);
 
   function pick(next: string) {
@@ -68,28 +83,32 @@ export default function Select({
         aria-label={ariaLabel}
         onClick={() => setOpen((current) => !current)}
         className={cn(
-          "flex w-full items-center justify-between gap-2 rounded-[10px] border bg-white px-3 text-left text-sm outline-none transition-all duration-150",
-          "h-12 border-[#E4E7EC] text-[#14213D]",
-          "focus:border-[#16A05D] focus:ring-[3px] focus:ring-[#16A05D]/12",
-          open && "border-[#16A05D] ring-[3px] ring-[#16A05D]/12",
+          "flex h-11 w-full items-center justify-between gap-2 rounded-[6px] border border-line bg-surface px-3 text-left text-sm text-ink outline-none transition-colors duration-150 focus:border-accent",
+          open && "border-accent",
           className,
         )}
       >
-        <span className={selected ? "truncate" : "truncate text-[#667085]"}>{selected?.label ?? placeholder}</span>
-        <ChevronDown size={16} strokeWidth={1.8} className={cn("shrink-0 text-[#667085] transition-transform duration-150", open && "rotate-180")} />
+        <span className={cn("truncate", !selected && "text-muted")}>{selected?.label ?? placeholder}</span>
+        <ChevronDown size={16} strokeWidth={1.8} className={cn("shrink-0 text-muted transition-transform duration-150", open && "rotate-180")} />
       </button>
       {open && (
-        <div className="absolute z-30 mt-1.5 w-full overflow-hidden rounded-2xl border border-[#E4E7EC] bg-white p-1.5 shadow-[0_12px_32px_rgba(16,24,40,0.10)]">
+        <div
+          ref={listRef}
+          className={cn(
+            "absolute z-30 w-full overflow-hidden rounded-[10px] border border-line bg-surface p-1.5 shadow-overlay",
+            dropUp ? "bottom-full mb-1.5 menu-in-up" : "top-full mt-1.5 menu-in",
+          )}
+        >
           {searchable && (
             <input
               ref={searchRef}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Qidirish"
-              className="mb-1 h-10 w-full rounded-xl border border-[#E4E7EC] px-3 text-sm outline-none focus:border-[#16A05D]"
+              className="mb-1 h-10 w-full rounded-[6px] border border-line px-3 text-sm outline-none focus:border-accent"
             />
           )}
-          <ul id={listId} role="listbox" className="max-h-64 overflow-auto">
+          <ul id={listId} role="listbox" className="max-h-48 overflow-auto">
             {filtered.map((item) => {
               const active = item.value === value;
               return (
@@ -100,8 +119,8 @@ export default function Select({
                     aria-selected={active}
                     onClick={() => pick(item.value)}
                     className={cn(
-                      "flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left text-sm transition-colors duration-150",
-                      active ? "bg-[#EAF8F0] font-semibold text-[#087A45]" : "text-[#14213D] hover:bg-[#F5FBF7]",
+                      "flex w-full items-center justify-between gap-2 rounded-[6px] px-3 py-2.5 text-left text-sm",
+                      active ? "bg-soft font-semibold text-accent" : "text-ink hover:bg-subtle",
                     )}
                   >
                     {item.label}
@@ -110,7 +129,7 @@ export default function Select({
                 </li>
               );
             })}
-            {filtered.length === 0 && <li className="px-3 py-3 text-sm text-[#667085]">Mos viloyat yo‘q</li>}
+            {filtered.length === 0 && <li className="px-3 py-3 text-sm text-muted">Mos qator yo‘q</li>}
           </ul>
         </div>
       )}
