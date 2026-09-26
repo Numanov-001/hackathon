@@ -3,6 +3,8 @@ import AccountPage from "./AccountPage";
 import { DEFAULT_PREFS, loadPrefs, savePrefs, type AccountPrefs } from "./data/profile";
 import { MOCK_SOURCE } from "./data/catalog";
 import { buildOffers, type P2POffer, type P2PSide } from "./data/p2p";
+import { fetchOffers } from "./data/supabaseApi";
+import { hasSupabase } from "./lib/supabase";
 import { productById } from "./data/products";
 import { useSiatProducts } from "./hooks/useSiatProducts";
 import { formatPrice } from "./lib/format";
@@ -47,6 +49,7 @@ export default function Dashboard({
   const [maxPrice, setMaxPrice] = useState("");
   const [minQty, setMinQty] = useState("");
   const [toast, setToast] = useState("");
+  const [remoteOffers, setRemoteOffers] = useState<P2POffer[]>([]);
 
   const profile: UserProfile = {
     name: userName,
@@ -56,7 +59,8 @@ export default function Dashboard({
   };
 
   const product = useMemo(() => productById(products, productId), [products, productId]);
-  const offers = useMemo(() => buildOffers(products), [products]);
+  const localOffers = useMemo(() => buildOffers(products), [products]);
+  const offers = remoteOffers.length ? remoteOffers : localOffers;
   const filtered = offers.filter((offer) => {
     if (side === "buy" ? offer.side !== "sell" : offer.side !== "buy") return false;
     if (p2pProduct && offer.productId !== p2pProduct) return false;
@@ -71,6 +75,9 @@ export default function Dashboard({
 
   useEffect(() => {
     setPrefs(loadPrefs());
+    fetchOffers().then((rows) => {
+      if (rows.length) setRemoteOffers(rows);
+    });
   }, []);
 
   useEffect(() => {
@@ -211,7 +218,7 @@ export default function Dashboard({
       </main>
       <footer className="mx-auto flex w-full max-w-[1440px] justify-between gap-4 px-4 pb-24 text-[13px] text-muted lg:px-6 lg:pb-8">
         <p>{MOCK_SOURCE.label}</p>
-        <p>{MOCK_SOURCE.note}</p>
+        <p>{MOCK_SOURCE.note}{hasSupabase() ? " · Supabase" : ""}</p>
       </footer>
       <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-line bg-surface lg:hidden" aria-label="Pastki menyu">
         {[

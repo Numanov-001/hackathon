@@ -3,6 +3,8 @@
 **/*.pyc
 **/.venv/
 **/.env
+**/.env.local
+**/.env*.local
 **/*.db
 **/.pytest_cache/
 
