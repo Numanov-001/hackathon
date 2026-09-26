@@ -23,11 +23,21 @@ const PLAN_UI: Record<PlanId, { blurb: string; Icon: typeof Leaf; featured?: boo
   business: { blurb: "Jamoa va ko'proq e'lon.", Icon: Building2, cta: "Business olish" },
 };
 
+function BotanicLeaf({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 64 96" className={className} fill="currentColor" aria-hidden="true">
+      <path d="M32 94c1-22 4-36 4-50C36 22 32 8 32 8S28 22 28 44c0 14 3 28 4 50Z" opacity="0.35" />
+      <path d="M32 8c-2 16-24 28-24 50 0 16 10 26 24 36 14-10 24-20 24-36C56 36 34 24 32 8Z" />
+    </svg>
+  );
+}
+
 function CardLeaves() {
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      <Leaf className="absolute -bottom-3 -right-2 h-16 w-16 -rotate-12 text-accent/20" />
-      <Leaf className="absolute -bottom-2 left-6 h-10 w-10 rotate-12 text-accent/15" />
+    <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[16px]" aria-hidden="true">
+      <BotanicLeaf className="absolute -bottom-5 -left-2 h-20 w-14 -rotate-[28deg] text-accent/20" />
+      <BotanicLeaf className="absolute -bottom-6 left-10 h-16 w-11 rotate-[18deg] text-accent/14" />
+      <BotanicLeaf className="absolute -bottom-4 -right-1 h-[5.5rem] w-16 rotate-[32deg] text-accent/22" />
     </div>
   );
 }
@@ -122,10 +132,10 @@ export default function AccountPage({ mode, profile, onChange, onSave, onChooseP
 
   return (
     <section className="relative mx-auto w-full max-w-[1200px] overflow-hidden rounded-[16px] bg-soft px-4 py-10 lg:px-8" aria-labelledby="obuna-title">
-      <Leaf className="pointer-events-none absolute left-[12%] top-16 h-6 w-6 -rotate-12 text-accent/40" aria-hidden="true" />
-      <Leaf className="pointer-events-none absolute right-[14%] top-20 h-6 w-6 rotate-12 text-accent/40" aria-hidden="true" />
-      <Sprout className="pointer-events-none absolute bottom-6 left-8 h-8 w-8 text-accent/25" aria-hidden="true" />
-      <Leaf className="pointer-events-none absolute bottom-8 right-10 h-8 w-8 -rotate-6 text-accent/25" aria-hidden="true" />
+      <BotanicLeaf className="pointer-events-none absolute left-[10%] top-20 h-8 w-6 -rotate-[40deg] text-accent/35" />
+      <BotanicLeaf className="pointer-events-none absolute right-[11%] top-24 h-8 w-6 rotate-[38deg] text-accent/35" />
+      <BotanicLeaf className="pointer-events-none absolute bottom-4 left-6 h-12 w-8 -rotate-[24deg] text-accent/20" />
+      <BotanicLeaf className="pointer-events-none absolute bottom-5 right-8 h-12 w-8 rotate-[26deg] text-accent/20" />
 
       <header className="relative mx-auto max-w-2xl text-center">
         <p className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-[13px] font-semibold uppercase tracking-[0.14em] text-accent">
@@ -159,7 +169,7 @@ export default function AccountPage({ mode, profile, onChange, onSave, onChooseP
             >
               <article
                 className={cn(
-                  "plan-card relative flex h-full flex-col overflow-hidden rounded-[16px] bg-surface p-6 shadow-overlay",
+                  "plan-card relative flex h-full flex-col overflow-visible rounded-[16px] bg-surface p-6 shadow-overlay",
                   card.featured ? "border-2 border-accent" : "border border-line",
                   turning === card.key && "is-turning",
                 )}
@@ -167,7 +177,7 @@ export default function AccountPage({ mode, profile, onChange, onSave, onChooseP
               >
                 <CardLeaves />
                 {card.featured && (
-                  <p className="absolute left-1/2 top-0 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 rounded-full bg-surface px-3 py-1 text-[13px] font-semibold text-accent">
+                  <p className="absolute left-1/2 top-0 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1 text-[13px] font-semibold text-accent">
                     <Sprout size={14} strokeWidth={1.8} aria-hidden="true" />
                     Tavsiya etilgan
                   </p>
