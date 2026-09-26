@@ -6,14 +6,17 @@ export type PlanId = "free" | "plus" | "pro";
 
 export type UserProfile = {
   name: string;
-  role: string;
-  phone: string;
   email: string;
+  picture: string;
+  phone: string;
   region: string;
   alerts: boolean;
   plan: PlanId;
 };
 export type OrderStatus = "Yangi" | "Tasdiqlangan" | "Yetkazilmoqda" | "Yakunlangan";
+
+export type ProductCategory = "sabzavot" | "truba" | "optom";
+export type ProductUnit = "kg" | "m" | "qop";
 
 export type ChartPoint = {
   date: string;
@@ -25,6 +28,8 @@ export type ChartPoint = {
 export type Product = {
   id: string;
   name: string;
+  category: ProductCategory;
+  unit: ProductUnit;
   image: string;
   price: number;
   change: number;

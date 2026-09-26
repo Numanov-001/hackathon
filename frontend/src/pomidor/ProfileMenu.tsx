@@ -1,10 +1,9 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { ChevronDown, CreditCard, LogOut, UserRound } from "lucide-react";
+import Avatar from "./Avatar";
 import { cn } from "./lib/cn";
 import { PLANS } from "./data/profile";
 import type { UserProfile } from "./types";
-
-const AVATAR = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&h=120&q=80";
 
 type ProfileMenuProps = {
   profile: UserProfile;
@@ -40,17 +39,12 @@ export default function ProfileMenu({ profile, onProfile, onSettings, onLogout }
 
   return (
     <div className="relative" ref={root}>
-      <div
-        className={cn(
-          "flex items-center rounded-xl py-1 pl-1 pr-1 transition-all duration-150 ease-out",
-          open ? "bg-[#EAF8F0]" : "hover:bg-[#F5FBF7]",
-        )}
-      >
-        <button type="button" onClick={onProfile} className="flex items-center gap-2 rounded-lg py-0.5 pl-0.5 pr-2">
-          <img src={AVATAR} alt="" className="h-9 w-9 rounded-full object-cover ring-1 ring-[#E4E7EC]" />
+      <div className={cn("flex items-center rounded-[6px] py-1 pl-1 pr-1", open ? "bg-soft" : "hover:bg-subtle")}>
+        <button type="button" onClick={onProfile} className="flex items-center gap-2 rounded-[6px] py-0.5 pl-0.5 pr-2">
+          <Avatar name={profile.name} picture={profile.picture} />
           <span className="hidden text-left sm:grid">
-            <span className="text-sm font-semibold text-[#14213D]">{profile.name.split(" ")[0]}</span>
-            <span className="text-xs text-[#667085]">{profile.role}</span>
+            <span className="text-sm font-semibold text-ink">{profile.name.split(" ")[0] || "Hisob"}</span>
+            <span className="max-w-[160px] truncate text-[13px] text-muted">{profile.email}</span>
           </span>
         </button>
         <button
@@ -60,9 +54,9 @@ export default function ProfileMenu({ profile, onProfile, onSettings, onLogout }
           aria-controls={menuId}
           aria-label="Profil menyusi"
           onClick={() => setOpen((value) => !value)}
-          className="grid h-9 w-9 place-items-center rounded-lg text-[#667085]"
+          className="grid h-9 w-9 place-items-center rounded-[6px] text-muted"
         >
-          <ChevronDown size={16} strokeWidth={1.8} className={cn("transition-transform duration-200 ease-out", open && "rotate-180")} />
+          <ChevronDown size={16} strokeWidth={1.8} className={cn("transition-transform duration-200", open && "rotate-180")} />
         </button>
       </div>
       <div
@@ -70,27 +64,27 @@ export default function ProfileMenu({ profile, onProfile, onSettings, onLogout }
         role="menu"
         aria-hidden={!open}
         className={cn(
-          "absolute right-0 top-[calc(100%+8px)] z-50 w-64 origin-top-right rounded-2xl border border-[#E4E7EC] bg-white p-2 shadow-[0_16px_40px_rgba(16,24,40,0.12)] transition-all duration-200 ease-out",
-          open ? "pointer-events-auto translate-y-0 scale-100 opacity-100" : "pointer-events-none -translate-y-1 scale-95 opacity-0",
+          "absolute right-0 top-[calc(100%+8px)] z-50 w-64 origin-top-right rounded-[10px] border border-line bg-surface p-2 shadow-overlay transition-all duration-200",
+          open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none -translate-y-1 opacity-0",
         )}
       >
-        <div className="flex items-center gap-3 rounded-xl px-2 py-2">
-          <img src={AVATAR} alt="" className="h-11 w-11 rounded-full object-cover" />
-          <div>
-            <p className="text-sm font-semibold text-[#14213D]">{profile.name}</p>
-            <p className="text-xs text-[#667085]">{profile.role} · {PLANS.find((item) => item.id === profile.plan)?.name ?? "Bepul"}</p>
+        <div className="flex items-center gap-3 rounded-[6px] px-2 py-2">
+          <Avatar name={profile.name} picture={profile.picture} size="md" />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-ink">{profile.name}</p>
+            <p className="truncate text-[13px] text-muted">{PLANS.find((item) => item.id === profile.plan)?.name ?? "Bepul"}</p>
           </div>
         </div>
-        <div className="my-1 h-px bg-[#E4E7EC]" />
-        <button type="button" role="menuitem" onClick={() => go(onProfile)} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[#14213D] transition-colors duration-150 hover:bg-[#F5FBF7]">
-          <UserRound size={16} strokeWidth={1.8} className="text-[#667085]" />
+        <div className="my-1 h-px bg-line" />
+        <button type="button" role="menuitem" onClick={() => go(onProfile)} className="flex w-full items-center gap-3 rounded-[6px] px-3 py-2.5 text-sm font-medium text-ink hover:bg-subtle">
+          <UserRound size={16} strokeWidth={1.8} className="text-muted" />
           Profil
         </button>
-        <button type="button" role="menuitem" onClick={() => go(onSettings)} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[#14213D] transition-colors duration-150 hover:bg-[#F5FBF7]">
-          <CreditCard size={16} strokeWidth={1.8} className="text-[#667085]" />
+        <button type="button" role="menuitem" onClick={() => go(onSettings)} className="flex w-full items-center gap-3 rounded-[6px] px-3 py-2.5 text-sm font-medium text-ink hover:bg-subtle">
+          <CreditCard size={16} strokeWidth={1.8} className="text-muted" />
           Obuna
         </button>
-        <button type="button" role="menuitem" onClick={() => go(onLogout)} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[#F04438] transition-colors duration-150 hover:bg-[#FEF3F2]">
+        <button type="button" role="menuitem" onClick={() => go(onLogout)} className="flex w-full items-center gap-3 rounded-[6px] px-3 py-2.5 text-sm font-medium text-bid hover:bg-subtle">
           <LogOut size={16} strokeWidth={1.8} />
           Chiqish
         </button>

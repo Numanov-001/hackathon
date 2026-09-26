@@ -1,18 +1,6 @@
 import type { ChartPoint, Product } from "../types";
+import { productPhoto } from "./catalog";
 import { SIAT_ALIASES, SIAT_MONTHS, SIAT_ROWS, SIAT_SOURCE } from "./siatOfficial";
-
-const IMG: Record<string, string> = {
-  pomidor: "https://images.unsplash.com/photo-1546470427-e99c2c387e9e?auto=format&fit=crop&w=240&h=240&q=80",
-  bodring: "https://images.unsplash.com/photo-1449300079323-02e209d9d3a6?auto=format&fit=crop&w=240&h=240&q=80",
-  kartoshka: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=240&h=240&q=80",
-  piyoz: "https://images.unsplash.com/photo-1508747703725-719777637510?auto=format&fit=crop&w=240&h=240&q=80",
-  sabzi: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?auto=format&fit=crop&w=240&h=240&q=80",
-  qalampir: "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=240&h=240&q=80",
-  karam: "https://images.unsplash.com/photo-1594282415386-c438f0c2871c?auto=format&fit=crop&w=240&h=240&q=80",
-  olma: "https://images.unsplash.com/photo-1560806887-1e4cd0b21094?auto=format&fit=crop&w=240&h=240&q=80",
-  uzum: "https://images.unsplash.com/photo-1537640538966-79f369143f8f?auto=format&fit=crop&w=240&h=240&q=80",
-  tarvuz: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=240&h=240&q=80",
-};
 
 const NAMES: Record<string, string> = {
   pomidor: "Pomidor",
@@ -59,7 +47,9 @@ function productFromSeries(id: string, values: number[], months: string[]): Prod
   return {
     id,
     name: NAMES[id],
-    image: IMG[id],
+    category: "sabzavot",
+    unit: "kg",
+    image: productPhoto(id),
     price: Math.round(last),
     change: Number(change.toFixed(1)),
     chartData: toPoints(values, months),

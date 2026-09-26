@@ -1,7 +1,7 @@
 import type { Product } from "../types";
-import { productsFromSiat } from "./siat";
+import { buildCatalog } from "./catalog";
 
-export const PRODUCTS: Product[] = productsFromSiat();
+export const PRODUCTS: Product[] = buildCatalog();
 
 export function productById(list: Product[], id: string) {
   return list.find((item) => item.id === id) ?? list[0];

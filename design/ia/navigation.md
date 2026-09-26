@@ -1,16 +1,17 @@
 ## Navigation
 
-One level. The same words appear in the sidebar, the section title, and the primary action.
+One level. The same words appear in the top bar, the section title, and the primary action.
 
-- **Markets** — price history for the selected product.
-- **Intentions** — buy and sell offers. These are intentions, not completed trades.
-- **Summary** — last price, spread, and activity for the selected product.
-- **Forecast** — estimated move and the limit of that estimate.
-- **Opportunities** — ask offers compared with the regional median.
-- **Assistant** — search interpreted into a product, region, volume, and price.
+- **Bozor** — market overview: selected crop chart, top products, news. Open without an account.
+- **P2P** — buy and sell offers. These are intentions, not completed trades. Acting on an offer needs sign-in.
+- **Mahsulotlar** — all tracked crops with last price and change.
+- **Kirish** — Gmail / Google. One account. No seller or buyer role.
+- **Profil** — name, phone, region. Email comes from Gmail.
+- **Obuna** — account plan.
 
 ### Guidelines
 
 - Noun labels, present tense.
-- “Publish intention” is the primary action on every viewport.
+- Bozor is the jury demo home. Keep it an overview, not a full terminal.
+- Do not ask users to pick Fermer, Xaridor, or Sotuvchi.
 - “Ask” means a sell offer. “Bid” means a buy offer. Spell both out in the publish form.

@@ -2,13 +2,22 @@
 
 @theme {
   --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
-  --color-green-brand: #16A05D;
-  --color-green-dark: #087A45;
-  --color-green-soft: #EAF8F0;
-  --color-page: #F7FAF8;
-  --color-ink: #14213D;
-  --color-muted: #667085;
-  --color-line: #E4E7EC;
+  --color-canvas: #ffffff;
+  --color-surface: #ffffff;
+  --color-subtle: #f4f6f5;
+  --color-ink: #1c2420;
+  --color-muted: #4e5a54;
+  --color-line: #e0e3eb;
+  --color-line-strong: #b7afa0;
+  --color-ask: #0e6b3c;
+  --color-bid: #9b1c1c;
+  --color-accent: #146b43;
+  --color-accent-hover: #0f5534;
+  --color-soft: #e3f2ea;
+  --color-focus: #146b43;
+  --color-live: #8a4b08;
+  --color-on-accent: #ffffff;
+  --shadow-overlay: 0 12px 32px rgba(22, 48, 40, 0.16);
 }
 
 html,
@@ -20,14 +29,17 @@ body,
 body {
   margin: 0;
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  color: #14213d;
-  background-color: #f7faf8;
-  background-image:
-    linear-gradient(180deg, rgba(247, 250, 248, 0.78), rgba(247, 250, 248, 0.88)),
-    url("/veg-bg.jpg");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  color: var(--color-ink);
+  background: var(--color-canvas);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
 @keyframes fadeIn {
