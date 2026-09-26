@@ -6,7 +6,7 @@ import ProductBrief from "./ProductBrief";
 import SparkCard from "./SparkCard";
 import Watchlist from "./Watchlist";
 import { formatPrice } from "./lib/format";
-import type { ChartPoint, Product } from "./types";
+import type { ChartPoint, PlanId, Product } from "./types";
 
 type MarketOverviewProps = {
   products: Product[];
@@ -14,6 +14,11 @@ type MarketOverviewProps = {
   live: boolean;
   onSelect: (id: string) => void;
   onAll: () => void;
+  plan: PlanId;
+  isSignedIn: boolean;
+  getToken?: () => Promise<string | null>;
+  onNeedAuth: () => void;
+  onNeedPlan: () => void;
 };
 
 function basketSeries(products: Product[]): ChartPoint[] {
@@ -29,7 +34,7 @@ function basketSeries(products: Product[]): ChartPoint[] {
   });
 }
 
-export default function MarketOverview({ products, product, live: _live, onSelect, onAll }: MarketOverviewProps) {
+export default function MarketOverview({ products, product, live: _live, onSelect, onAll, plan, isSignedIn, getToken, onNeedAuth, onNeedPlan }: MarketOverviewProps) {
   const basket = useMemo(() => basketSeries(products), [products]);
   const basketPrice = basket.filter((point) => point.price > 0).at(-1)?.price ?? 0;
   const basketPrev = basket.filter((point) => point.price > 0).at(-2)?.price ?? basketPrice;
@@ -39,13 +44,20 @@ export default function MarketOverview({ products, product, live: _live, onSelec
     <div className="grid gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-ink">Bozor ko‘rinishi</h1>
+          <h1 className="text-xl font-semibold text-ink">Bozor ko'rinishi</h1>
         </div>
       </div>
 
       <div className="grid items-stretch gap-4 lg:grid-cols-12">
         <div className="lg:col-span-8">
-          <HeroChart product={product} />
+          <HeroChart
+            product={product}
+            plan={plan}
+            getToken={getToken}
+            isSignedIn={isSignedIn}
+            onNeedAuth={onNeedAuth}
+            onNeedPlan={onNeedPlan}
+          />
         </div>
         <div className="lg:col-span-4">
           <Watchlist products={products} selectedId={product.id} onSelect={onSelect} onAll={onAll} />
@@ -59,8 +71,8 @@ export default function MarketOverview({ products, product, live: _live, onSelec
         <div className="lg:col-span-4">
           <SparkCard
             title="Bozor savati"
-            ticker="O‘rtacha kg"
-            price={`${formatPrice(basketPrice)} so‘m / kg`}
+            ticker="O'rtacha kg"
+            price={`${formatPrice(basketPrice)} so'm / kg`}
             change={basketChange}
             data={basket}
           />

@@ -232,6 +232,11 @@ export default function Dashboard({
             live={live}
             onSelect={openProduct}
             onAll={() => setSection("mahsulotlar")}
+            plan={plan}
+            isSignedIn={isSignedIn}
+            getToken={getToken}
+            onNeedAuth={askClerk}
+            onNeedPlan={() => { goSection("obuna"); showToast("Prognoz Starter tarifidan."); }}
           />
         )}
         {section === "mahsulotlar" && (

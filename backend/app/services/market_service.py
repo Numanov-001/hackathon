@@ -27,9 +27,14 @@ def resolve_product(db: Session, product_ref: str) -> Product:
     if product_ref.isdigit():
         product = db.get(Product, int(product_ref))
     else:
+        # Try slug first, then name (ilike)
         product = db.execute(
-            select(Product).where(Product.name.ilike(product_ref))
+            select(Product).where(Product.slug == product_ref)
         ).scalar_one_or_none()
+        if product is None:
+            product = db.execute(
+                select(Product).where(Product.name.ilike(product_ref))
+            ).scalar_one_or_none()
     if product is None:
         raise ValueError("Product not found")
     return product

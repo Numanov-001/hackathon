@@ -49,3 +49,30 @@ export type Order = {
   phone: string;
   note: string;
 };
+
+export type ForecastHorizon = 3 | 6 | 12;
+
+export type PredictionPoint = {
+  date: string;
+  price: number;
+  low: number;
+  high: number;
+};
+
+export type PredictionExplanation = {
+  direction: string;
+  seasonal: string;
+  driver: string;
+  recommendation: string;
+};
+
+export type PredictionData = {
+  product: string;
+  horizon: number;
+  predicted_points: PredictionPoint[];
+  trend: "up" | "down" | "flat";
+  explanation: PredictionExplanation;
+  confidence: string;
+  best_action: string;
+  disclaimer: string;
+};

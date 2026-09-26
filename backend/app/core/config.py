@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     rec_location_weight: float = 0.3
     rec_volume_weight: float = 0.2
 
+    openrouter_api_key: str = ""
+    openrouter_model: str = "deepseek/deepseek-v4-flash"
+
 
 @lru_cache
 def get_settings() -> Settings:
