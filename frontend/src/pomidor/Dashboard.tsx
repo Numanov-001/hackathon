@@ -12,8 +12,6 @@ import MarketOverview from "./MarketOverview";
 import Navbar from "./Navbar";
 import P2PBoard from "./P2PBoard";
 import ProductTable from "./ProductTable";
-import { buildMarketSnapshot } from "./lib/marketSnapshot";
-import SiteAssistant from "./SiteAssistant";
 import Toast from "./Toast";
 import WelcomeSplash from "./WelcomeSplash";
 import type { NavId, PlanId, UserProfile } from "./types";
@@ -299,7 +297,6 @@ export default function Dashboard({
           </button>
         ))}
       </nav>
-      {isSignedIn && product && <SiteAssistant snapshot={buildMarketSnapshot(product, products)} />}
       <Toast message={toast} />
     </div>
   );
