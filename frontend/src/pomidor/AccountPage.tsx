@@ -1,27 +1,42 @@
+import { useState } from "react";
 import { Mail, MapPin, Phone, Save, UserRound } from "lucide-react";
 import { REGIONS } from "./data/products";
-import { FREE_PLAN } from "./data/profile";
+import { CUSTOM_PLAN, PLANS } from "./data/profile";
 import Select from "./Select";
-import type { UserProfile } from "./types";
+import type { PlanId, UserProfile } from "./types";
 
 type AccountPageProps = {
-  mode: "profil" | "sozlamalar";
+  mode: "profil" | "obuna";
   profile: UserProfile;
   onChange: (next: UserProfile) => void;
   onSave: () => void;
+  onChoosePlan?: (plan: PlanId) => Promise<void>;
+  onCustom?: () => void;
 };
 
 const field = "h-12 rounded-[6px] border border-line bg-surface px-3 text-sm outline-none focus:border-accent";
 
-export default function AccountPage({ mode, profile, onChange, onSave }: AccountPageProps) {
+export default function AccountPage({ mode, profile, onChange, onSave, onChoosePlan, onCustom }: AccountPageProps) {
+  const [busy, setBusy] = useState<PlanId | null>(null);
   const title = mode === "profil" ? "Profil" : "Obuna";
+
+  async function choose(plan: PlanId) {
+    if (!onChoosePlan || plan === profile.plan) return;
+    setBusy(plan);
+    try {
+      await onChoosePlan(plan);
+    } finally {
+      setBusy(null);
+    }
+  }
+
   return (
-    <section className="mx-auto w-full max-w-3xl rounded-[10px] border border-line bg-surface p-6">
+    <section className={`mx-auto w-full rounded-[10px] border border-line bg-surface p-6 ${mode === "obuna" ? "max-w-5xl" : "max-w-3xl"}`}>
       <h2 className="text-xl font-semibold text-ink">{title}</h2>
       <p className="mt-1 text-sm text-muted">
         {mode === "profil"
           ? "Ism va email Clerk hisobidan. Rol yo‘q."
-          : "Hozir faqat bepul obuna. Pullik tariflar yo‘q."}
+          : "Tanlash hisobni ochadi. Click va Payme hali ulanmagan."}
       </p>
       {mode === "profil" ? (
         <div className="mt-6 grid gap-4">
@@ -49,16 +64,46 @@ export default function AccountPage({ mode, profile, onChange, onSave }: Account
           </div>
         </div>
       ) : (
-        <div className="mt-6 grid gap-4">
-          <article className="rounded-[10px] border border-accent bg-soft p-4">
-            <p className="flex items-center justify-between gap-2">
-              <span className="font-semibold text-ink">{FREE_PLAN.name}</span>
-              <span className="rounded-full bg-surface px-2 py-0.5 text-[13px] font-semibold text-accent">Joriy</span>
-            </p>
-            <p className="mt-1 text-sm font-semibold text-accent">{FREE_PLAN.price}</p>
-            <ul className="mt-3 grid gap-1.5 text-[13px] text-muted">
-              {FREE_PLAN.points.map((point) => <li key={point}>{point}</li>)}
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          {PLANS.map((plan) => {
+            const current = profile.plan === plan.id;
+            return (
+              <article key={plan.id} className={`flex flex-col rounded-[10px] border p-4 ${current ? "border-accent bg-soft" : "border-line bg-surface"}`}>
+                <p className="flex items-center justify-between gap-2">
+                  <span className="font-semibold text-ink">{plan.name}</span>
+                  {current && <span className="rounded-full bg-surface px-2 py-0.5 text-[13px] font-semibold text-accent">Joriy</span>}
+                </p>
+                <p className="mt-1 text-xl font-semibold text-ink">
+                  {plan.price} <span className="text-sm font-medium text-muted">{plan.period}</span>
+                </p>
+                <ul className="mt-3 grid flex-1 gap-1.5 text-[13px] text-muted">
+                  {plan.points.map((point) => <li key={point}>{point}</li>)}
+                </ul>
+                <button
+                  type="button"
+                  disabled={current || busy !== null}
+                  aria-current={current ? "true" : undefined}
+                  onClick={() => choose(plan.id)}
+                  className="mt-4 inline-flex h-11 items-center justify-center rounded-[6px] bg-accent px-4 text-sm font-semibold text-on-accent hover:bg-accent-hover disabled:cursor-default disabled:bg-subtle disabled:text-muted"
+                >
+                  {current ? "Joriy" : busy === plan.id ? "Ochilmoqda" : "Tanlash"}
+                </button>
+              </article>
+            );
+          })}
+          <article className="flex flex-col rounded-[10px] border border-line bg-surface p-4">
+            <p className="font-semibold text-ink">{CUSTOM_PLAN.name}</p>
+            <p className="mt-1 text-xl font-semibold text-ink">{CUSTOM_PLAN.price}</p>
+            <ul className="mt-3 grid flex-1 gap-1.5 text-[13px] text-muted">
+              {CUSTOM_PLAN.points.map((point) => <li key={point}>{point}</li>)}
             </ul>
+            <button
+              type="button"
+              onClick={onCustom}
+              className="mt-4 inline-flex h-11 items-center justify-center rounded-[6px] border border-line bg-surface px-4 text-sm font-semibold text-ink hover:bg-subtle"
+            >
+              Bog‘lanish
+            </button>
           </article>
         </div>
       )}

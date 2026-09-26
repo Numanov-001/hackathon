@@ -1,12 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AccountPage from "./AccountPage";
 import { DEFAULT_PREFS, loadPrefs, savePrefs, type AccountPrefs } from "./data/profile";
-import { MOCK_SOURCE } from "./data/catalog";
 import { type P2POffer, type P2PSide } from "./data/p2p";
-import { hasSupabase } from "./lib/supabase";
 import { productById } from "./data/products";
 import { useDeskOffers, type DeskOfferDraft } from "./hooks/useDeskOffers";
 import { useSiatProducts } from "./hooks/useSiatProducts";
+import { getJson, postJson } from "../api/client";
 import { formatPrice } from "./lib/format";
 import { priceUnit } from "./lib/unit";
 import MarketOverview from "./MarketOverview";
@@ -17,7 +16,7 @@ import { buildMarketSnapshot } from "./lib/marketSnapshot";
 import SiteAssistant from "./SiteAssistant";
 import Toast from "./Toast";
 import WelcomeSplash from "./WelcomeSplash";
-import type { NavId, UserProfile } from "./types";
+import type { NavId, PlanId, UserProfile } from "./types";
 
 type DashboardProps = {
   clerkEnabled: boolean;
@@ -26,6 +25,7 @@ type DashboardProps = {
   userEmail: string;
   userPicture: string;
   openSignIn: () => void;
+  getToken?: () => Promise<string | null>;
 };
 
 export default function Dashboard({
@@ -35,9 +35,12 @@ export default function Dashboard({
   userEmail,
   userPicture,
   openSignIn,
+  getToken,
 }: DashboardProps) {
   const { products, live } = useSiatProducts();
-  const { offers, publish } = useDeskOffers(products);
+  const [plan, setPlan] = useState<PlanId>("free");
+  const [planReady, setPlanReady] = useState(false);
+  const { offers, publish } = useDeskOffers(products, getToken, plan);
   const [section, setSection] = useState<NavId>("bozor");
   const [menuOpen, setMenuOpen] = useState(false);
   const [productId, setProductId] = useState("pomidor");
@@ -52,13 +55,19 @@ export default function Dashboard({
   const [maxPrice, setMaxPrice] = useState("");
   const [minQty, setMinQty] = useState("");
   const [toast, setToast] = useState("");
+  const getTokenRef = useRef(getToken);
+  getTokenRef.current = getToken;
 
   const profile: UserProfile = {
     name: userName,
     email: userEmail,
     picture: userPicture,
-    ...prefs,
+    phone: prefs.phone,
+    region: prefs.region,
+    alerts: prefs.alerts,
+    plan,
   };
+  const contacts = plan === "starter" || plan === "business";
 
   const product = useMemo(() => productById(products, productId), [products, productId]);
   const filtered = offers.filter((offer) => {
@@ -76,19 +85,51 @@ export default function Dashboard({
   }, []);
 
   useEffect(() => {
+    if (!isSignedIn) {
+      setPlan("free");
+      setPlanReady(true);
+      return;
+    }
+    let cancel = false;
+    setPlanReady(false);
+    (async () => {
+      try {
+        const token = getTokenRef.current ? await getTokenRef.current() : null;
+        const row = (await getJson("/api/desk/plan", token)) as { plan?: PlanId };
+        if (!cancel && (row.plan === "starter" || row.plan === "business" || row.plan === "free")) {
+          setPlan(row.plan);
+        }
+      } catch {
+        if (!cancel) setPlan("free");
+      } finally {
+        if (!cancel) setPlanReady(true);
+      }
+    })();
+    return () => {
+      cancel = true;
+    };
+  }, [isSignedIn]);
+
+  useEffect(() => {
     if (!isSignedIn && (section === "obuna" || section === "profil")) {
       setSection("bozor");
     }
   }, [isSignedIn, section]);
 
   useEffect(() => {
-    if (!isSignedIn || !pending) return;
+    if (!isSignedIn || !pending || !planReady) return;
     if (pending === "trade" && pendingOffer) finishTrade(pendingOffer);
-    if (pending === "post") setPostOpen(true);
+    if (pending === "post") {
+      if (plan === "starter" || plan === "business") setPostOpen(true);
+      else {
+        setSection("obuna");
+        showToast("E’lon qo‘yish Starter tarifidan.");
+      }
+    }
     if (pending === "obuna" || pending === "profil") setSection(pending);
     setPending(null);
     setPendingOffer(null);
-  }, [isSignedIn, pending, pendingOffer]);
+  }, [isSignedIn, pending, pendingOffer, plan, planReady]);
 
   function showToast(message: string) {
     setToast(message);
@@ -135,7 +176,27 @@ export default function Dashboard({
 
   function openPost() {
     if (needAuth("post")) return;
+    if (!contacts) {
+      setSection("obuna");
+      showToast("E’lon qo‘yish Starter tarifidan.");
+      return;
+    }
     setPostOpen(true);
+  }
+
+  async function choosePlan(next: PlanId) {
+    const read = getTokenRef.current;
+    if (!read) return;
+    try {
+      const token = await read();
+      const row = (await postJson("/api/desk/plan", { plan: next }, token)) as { plan?: PlanId };
+      if (row.plan === "starter" || row.plan === "business" || row.plan === "free") {
+        setPlan(row.plan);
+        showToast(row.plan === "free" ? "Bepul tarif." : "Tarif ochildi.");
+      }
+    } catch (err) {
+      showToast(err instanceof Error && err.message ? err.message : "Tarif ochilmadi.");
+    }
   }
 
   async function publishAd(draft: DeskOfferDraft) {
@@ -163,7 +224,7 @@ export default function Dashboard({
         onOpenProduct={openProduct}
         onNeedClerk={askClerk}
       />
-      <main id="main" className="mx-auto w-full max-w-[1440px] px-4 py-6 lg:px-6">
+      <main id="main" className="mx-auto w-full max-w-[1440px] px-4 py-6 pb-24 lg:px-6 lg:pb-8">
         {section === "bozor" && (
           <MarketOverview
             products={products}
@@ -197,15 +258,20 @@ export default function Dashboard({
             onClosePost={() => setPostOpen(false)}
             posterName={profile.name}
             posterPhone={profile.phone}
+            contacts={contacts}
+            advice={plan === "business"}
+            onUnlock={() => goSection("obuna")}
             onPublish={publishAd}
           />
         )}
         {section === "obuna" && isSignedIn && (
           <AccountPage
-            mode="sozlamalar"
+            mode="obuna"
             profile={profile}
             onChange={(next) => setPrefs({ phone: next.phone, region: next.region, alerts: next.alerts, plan: "free" })}
             onSave={saveAccount}
+            onChoosePlan={choosePlan}
+            onCustom={() => showToast("Custom tarif kelishuv bilan. Hozir ochilmaydi.")}
           />
         )}
         {section === "profil" && isSignedIn && (
@@ -217,10 +283,6 @@ export default function Dashboard({
           />
         )}
       </main>
-      <footer className="mx-auto flex w-full max-w-[1440px] justify-between gap-4 px-4 pb-24 text-[13px] text-muted lg:px-6 lg:pb-8">
-        <p>{MOCK_SOURCE.label}</p>
-        <p>{hasSupabase() ? "Rasmlar Supabase’da" : MOCK_SOURCE.note}</p>
-      </footer>
       <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-line bg-surface lg:hidden" aria-label="Pastki menyu">
         {[
           ["bozor", "Bozor"],

@@ -27,10 +27,42 @@ type P2PBoardProps = {
   onClosePost: () => void;
   posterName: string;
   posterPhone: string;
+  contacts: boolean;
+  advice: boolean;
+  onUnlock: () => void;
   onPublish: (draft: DeskOfferDraft) => Promise<void>;
 };
 
 const field = "h-11 rounded-[6px] border border-line bg-surface px-3 text-sm text-ink outline-none focus:border-accent";
+const OPEN_PHONE = /^\+998\d{9}$/;
+
+function PhoneCell({
+  phone,
+  contacts,
+  onUnlock,
+  className,
+}: {
+  phone: string;
+  contacts: boolean;
+  onUnlock: () => void;
+  className?: string;
+}) {
+  if (contacts && OPEN_PHONE.test(phone)) {
+    return (
+      <a href={phoneHref(phone)} className={cn("inline-flex h-11 items-center font-semibold text-accent underline-offset-2 hover:underline", className)}>
+        {formatPhone(phone)}
+      </a>
+    );
+  }
+  if (contacts) {
+    return <span className={cn("inline-flex h-11 items-center text-sm text-muted", className)}>Telefon yo‘q</span>;
+  }
+  return (
+    <button type="button" onClick={onUnlock} className={cn("inline-flex h-11 items-center font-semibold text-muted underline-offset-2 hover:underline", className)}>
+      Telefon yopiq
+    </button>
+  );
+}
 
 export default function P2PBoard({
   side,
@@ -52,6 +84,9 @@ export default function P2PBoard({
   onClosePost,
   posterName,
   posterPhone,
+  contacts,
+  advice,
+  onUnlock,
   onPublish,
 }: P2PBoardProps) {
   return (
@@ -61,7 +96,8 @@ export default function P2PBoard({
           <div>
             <h2 className="text-lg font-semibold text-ink">P2P</h2>
             <p className="text-[13px] text-muted">
-              {side === "buy" ? "Sotuvchilar, arzonidan qimmatiga." : "Xaridorlar, arzonidan qimmatiga."} Telefon orqali bog‘lanasiz.
+              {side === "buy" ? "Sotuvchilar, arzonidan qimmatiga." : "Xaridorlar, arzonidan qimmatiga."}{" "}
+              {contacts ? "Telefon orqali bog‘lanasiz." : "Telefon Starter tarifida ochiladi."}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -135,6 +171,12 @@ export default function P2PBoard({
         </div>
       </div>
 
+      {advice && offers[0] && (
+        <p className="border-b border-line bg-soft px-4 py-3 text-sm text-ink sm:px-5">
+          Tavsiya: eng arzon {offers[0].seller}, {formatPrice(offers[0].price)} {priceUnit(offers[0].unit)}.
+        </p>
+      )}
+
       <div className="hidden px-4 md:block sm:px-5">
         <table className="w-full text-left text-sm">
           <thead className="sticky top-[var(--p2p-head,0)]">
@@ -162,7 +204,7 @@ export default function P2PBoard({
                   </td>
                   <td className="py-3 pr-3 text-ink">{offer.region}</td>
                   <td className="py-3">
-                    <a href={phoneHref(offer.phone)} className="font-semibold text-accent underline-offset-2 hover:underline">{formatPhone(offer.phone)}</a>
+                    <PhoneCell phone={offer.phone} contacts={contacts} onUnlock={onUnlock} className="mt-2" />
                   </td>
                 </tr>
               );
@@ -184,7 +226,7 @@ export default function P2PBoard({
                 <p className="tabular text-right font-semibold">{formatPrice(offer.price)} <span className="block text-[13px] font-medium text-muted">{priceUnit(offer.unit)}</span></p>
               </div>
               <p className="mt-2 text-sm text-ink">{lot.primary} <span className="text-muted">· {lot.secondary}</span></p>
-              <a href={phoneHref(offer.phone)} className="mt-2 inline-flex h-11 items-center font-semibold text-accent underline-offset-2 hover:underline">{formatPhone(offer.phone)}</a>
+              <PhoneCell phone={offer.phone} contacts={contacts} onUnlock={onUnlock} className="mt-2" />
             </article>
           );
         })}

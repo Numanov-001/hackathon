@@ -18,6 +18,8 @@ class Settings(BaseSettings):
 
     cors_origins: str = "http://localhost:5173"
 
+    clerk_publishable_key: str = ""
+
     anthropic_api_key: str = ""
     anthropic_model: str = "claude-sonnet-4-5"
     chat_rate_limit_per_minute: int = 10

@@ -2,7 +2,7 @@ export type RangeKey = "1M" | "3M" | "6M" | "YTD" | "1Y" | "ALL";
 export type ChartMetric = "price" | "volume";
 export type NavId = "bozor" | "p2p" | "mahsulotlar" | "obuna" | "profil" | "sozlamalar";
 
-export type PlanId = "free";
+export type PlanId = "free" | "starter" | "business";
 
 export type UserProfile = {
   name: string;

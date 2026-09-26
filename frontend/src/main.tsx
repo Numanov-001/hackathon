@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { ClerkProvider, useClerk, useUser } from "@clerk/react";
+import { ClerkProvider, useAuth, useClerk, useUser } from "@clerk/react";
 import { clerkAppearance } from "./pomidor/clerkAppearance";
 import Dashboard from "./pomidor/Dashboard";
 import "./styles.css";
@@ -9,6 +9,7 @@ const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "";
 
 function ClerkApp() {
   const { isSignedIn, user } = useUser();
+  const { getToken } = useAuth();
   const clerk = useClerk();
   return (
     <Dashboard
@@ -18,6 +19,7 @@ function ClerkApp() {
       userEmail={user?.primaryEmailAddress?.emailAddress || ""}
       userPicture={user?.imageUrl || ""}
       openSignIn={() => clerk.openSignIn({ appearance: clerkAppearance })}
+      getToken={getToken}
     />
   );
 }

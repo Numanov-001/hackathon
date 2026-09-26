@@ -16,6 +16,5 @@ class UserRead(BaseModel):
 
     id: int
     name: str
-    phone: str
     role: UserRole
     created_at: datetime

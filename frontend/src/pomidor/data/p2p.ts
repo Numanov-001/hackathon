@@ -27,10 +27,10 @@ export type P2POffer = {
 };
 
 const SELLERS = [
-  ["Agro Fresh", "+998909100001", true, 99.1, 428],
-  ["Samarqand Dehqon", "+998909100002", true, 98.4, 312],
-  ["Toshkent Opt", "+998909100003", true, 98.9, 640],
-  ["Farg‘ona Plus", "+998909100004", true, 99.4, 510],
+  ["Agro Fresh", true, 99.1, 428],
+  ["Samarqand Dehqon", true, 98.4, 312],
+  ["Toshkent Opt", true, 98.9, 640],
+  ["Farg‘ona Plus", true, 99.4, 510],
 ] as const;
 
 function postedDate(index: number) {
@@ -59,10 +59,10 @@ export function buildOffers(products: Product[]): P2POffer[] {
         productName: product.name,
         unit: product.unit,
         seller: seller[0],
-        phone: seller[1],
-        verified: seller[2],
-        rating: seller[3],
-        trades: seller[4],
+        phone: "",
+        verified: seller[1],
+        rating: seller[2],
+        trades: seller[3],
         price: Math.round(product.price * shift),
         available,
         minQty: product.unit === "kg" ? 1000 : product.unit === "m" ? 20 : 10,

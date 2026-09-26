@@ -269,7 +269,7 @@ def list_catalog(db: Session) -> list[dict]:
     return payload
 
 
-def list_desk_offers(db: Session) -> list[dict]:
+def list_desk_offers(db: Session, include_phone: bool = False) -> list[dict]:
     offers = list(
         db.execute(
             select(Offer)
@@ -293,20 +293,26 @@ def list_desk_offers(db: Session) -> list[dict]:
         else:
             min_qty = 10
         verified, rating, trades = seller_meta.get(offer.seller.name, (False, 96.0, 40))
-        rows.append(_offer_row(offer, verified, rating, trades, min_qty))
+        rows.append(_offer_row(offer, verified, rating, trades, min_qty, include_phone))
     return rows
 
 
-def _offer_row(offer: Offer, verified: bool, rating: float, trades: int, min_qty: int) -> dict:
+def _offer_row(
+    offer: Offer,
+    verified: bool,
+    rating: float,
+    trades: int,
+    min_qty: int,
+    include_phone: bool = False,
+) -> dict:
     available = int(offer.volume)
-    return {
+    row = {
         "id": str(offer.id),
         "side": "sell" if offer.order_type == OrderType.ASK else "buy",
         "productId": offer.product.slug,
         "productName": offer.product.name,
         "unit": offer.product.unit,
         "seller": offer.seller.name,
-        "phone": offer.seller.phone,
         "verified": verified,
         "rating": rating,
         "trades": trades,
@@ -318,11 +324,14 @@ def _offer_row(offer: Offer, verified: bool, rating: float, trades: int, min_qty
         "region": offer.region.name,
         "postedAt": offer.created_at.isoformat(),
     }
+    if include_phone:
+        row["phone"] = offer.seller.phone
+    return row
 
 
 def create_desk_offer(db: Session, payload: dict) -> dict:
     phone = normalize_phone(str(payload.get("phone") or ""))
-    name = str(payload.get("name") or "").strip() or "Foydalanuvchi"
+    name = str(payload.get("name") or "").strip()[:80] or "Foydalanuvchi"
     slug = str(payload.get("productId") or "")
     region_name = str(payload.get("region") or "").strip()
     side = str(payload.get("side") or "")
@@ -366,4 +375,4 @@ def create_desk_offer(db: Session, payload: dict) -> dict:
     offer.product = product
     offer.region = region
     offer.seller = user
-    return _offer_row(offer, False, 0, 0, int(quantity))
+    return _offer_row(offer, False, 0, 0, int(quantity), include_phone=True)

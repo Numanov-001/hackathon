@@ -41,10 +41,10 @@ export function localMarketReply(question: string, snap: MarketSnapshot | null) 
     return "2027 uchun saytda qator yo'q. Demo 2026-sentyabrgacha. Shu davrni aytaymi?";
   }
   if (/p2p|e['']lon|escrow/.test(q) && !/narx|osh|tush|trend/.test(q)) {
-    return "P2P — sotib olish va sotish e'lonlari, arzonidan qimmatiga. Telefon ko'rinadi. Yopilgan savdo emas.";
+    return "P2P — sotib olish va sotish e'lonlari, arzonidan qimmatiga. Telefon Starter tarifida ochiladi. Yopilgan savdo emas.";
   }
   if (/obuna|plus|pro|clerk|kirish|profil/.test(q) && !/narx|osh|tush/.test(q)) {
-    return "Kirish Clerk orqali. Obuna hozir bepul. Profil — ism, telefon va viloyat.";
+    return "Kirish Clerk orqali. Bepul tarifda telefon yopiq. Starter 199 000 so'm/oy — telefon va e'lon. Business 299 000 so'm/oy — eng arzon taklif tavsiyasi. Custom kelishuv bilan, o'zi ochilmaydi.";
   }
 
   const a = analyze(snap);

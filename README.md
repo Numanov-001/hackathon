@@ -41,12 +41,14 @@ The page reads `frontend/.env`. Put `GROQ_API_KEY` there for the assistant. With
 
 ## Deploy
 
-Backend (Railway/Render): Python, start command from `backend/Procfile`. Set `DATABASE_URL`, `CORS_ORIGINS`, optional `ANTHROPIC_API_KEY`.
+Backend (Railway/Render): Python, start command from `backend/Procfile`. Set `DATABASE_URL`, `CORS_ORIGINS`, and `CLERK_PUBLISHABLE_KEY` (the same publishable key as the frontend, so a paid plan can receive phone numbers). Optional `ANTHROPIC_API_KEY`. Do not set a Clerk secret key.
 
 Frontend (Vercel/Netlify): `frontend/` build `npm run build`. Point API/WebSocket to the backend URL and update `frontend/vercel.json`.
 
 ## Roadmap (not in this MVP)
 
 +3 months: more categories, all regions, transactions.  
-+1 year: subscriptions, bank API, credit scoring.  
++1 year: bank API, credit scoring.  
 Future marketplace fee: 2–5%. No commission code now.
+
+Obuna in the demo is Bepul, Starter (199 000 so‘m/oy), Business (299 000 so‘m/oy), and Custom by agreement. Choosing a plan opens the account. Click and Payme are not connected.

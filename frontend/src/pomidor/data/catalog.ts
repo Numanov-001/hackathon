@@ -6,11 +6,6 @@ export const CATEGORY_LABEL: Record<ProductCategory, string> = {
   optom: "Optom",
 };
 
-export const MOCK_SOURCE = {
-  label: "Demo qator · 24 oy oylik o‘rtacha",
-  note: "Mock narxlar, jonli birja emas. 2024-okt — 2026-sen.",
-};
-
 export function productPhoto(id: string) {
   return `/products/${id}.jpg?v=2`;
 }

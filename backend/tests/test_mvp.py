@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+import pytest
 from sqlalchemy import select
 
 from app.models import Offer, Product, Region
@@ -133,10 +134,17 @@ def test_desk_catalog_and_offers(db, client):
     pomidor = next(item for item in catalog if item["id"] == "pomidor")
     assert len(pomidor["chartData"]) == 24
     assert pomidor["price"] > 0
-    offers = client.get("/api/desk/offers").json()
+    public = client.get("/api/desk/offers")
+    assert "+998" not in public.text
+    offers = public.json()
     assert len(offers) >= 10
     assert {item["side"] for item in offers} == {"buy", "sell"}
-    assert offers[0]["phone"].startswith("+998")
+    assert "phone" not in offers[0]
+    sneaky = client.get("/api/desk/offers", headers={"X-Plan": "business", "Authorization": "Bearer not-a-token"})
+    assert sneaky.status_code == 200
+    assert "+998" not in sneaky.text
+    assert "+998" not in client.get("/api/users").text
+    assert client.post("/api/desk/plan", json={"plan": "business"}).status_code == 401
     posted = client.post(
         "/api/desk/offers",
         json={
@@ -150,10 +158,33 @@ def test_desk_catalog_and_offers(db, client):
             "payment": "Naqd",
         },
     )
-    assert posted.status_code == 200
-    body = posted.json()
-    assert body["phone"] == "+998901112233"
-    assert body["side"] == "sell"
-    assert body["available"] == 2000
-    missing = client.post("/api/desk/offers", json={"productId": "pomidor", "side": "buy", "price": "1", "quantity": "1", "phone": "12", "region": "Samarqand"})
-    assert missing.status_code == 400
+    assert posted.status_code == 401
+    from app.services.desk_catalog import create_desk_offer, list_desk_offers
+
+    row = create_desk_offer(
+        db,
+        {
+            "productId": "pomidor",
+            "region": "Samarqand",
+            "side": "sell",
+            "price": "9000",
+            "quantity": "2000",
+            "phone": "901112233",
+            "name": "Test dehqon",
+            "payment": "Naqd",
+        },
+    )
+    db.commit()
+    assert row["phone"] == "+998901112233"
+    assert row["side"] == "sell"
+    assert row["available"] == 2000
+    hidden = client.get("/api/desk/offers")
+    assert "+998" not in hidden.text
+    assert all("phone" not in item for item in hidden.json())
+    paid_rows = list_desk_offers(db, include_phone=True)
+    assert any(item.get("phone", "").startswith("+998") for item in paid_rows)
+    with pytest.raises(ValueError):
+        create_desk_offer(
+            db,
+            {"productId": "pomidor", "side": "buy", "price": "1", "quantity": "1", "phone": "12", "region": "Samarqand"},
+        )

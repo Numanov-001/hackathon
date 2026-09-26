@@ -1,11 +1,52 @@
 import type { PlanId, UserProfile } from "../types";
 import { REGIONS } from "./siat";
 
-export const FREE_PLAN = {
-  id: "free" as const,
-  name: "Bepul",
-  price: "0 UZS",
-  points: ["Joriy narxlar", "P2P e’lonlarni ko‘rish"],
+export const PLANS: {
+  id: PlanId;
+  name: string;
+  price: string;
+  period: string;
+  points: string[];
+}[] = [
+  {
+    id: "free",
+    name: "Bepul",
+    price: "0",
+    period: "so‘m",
+    points: [
+      "Joriy narxlar va grafik",
+      "P2P: ism, narx, miqdor, hudud",
+      "Telefon yopiq",
+      "E’lon qo‘yib bo‘lmaydi",
+    ],
+  },
+  {
+    id: "starter",
+    name: "Starter",
+    price: "199 000",
+    period: "so‘m/oy",
+    points: [
+      "Bepul tarifdagi hammasi",
+      "Sotuvchi va xaridor telefoni",
+      "O‘z e’loningizni qo‘yish",
+    ],
+  },
+  {
+    id: "business",
+    name: "Business",
+    price: "299 000",
+    period: "so‘m/oy",
+    points: [
+      "Starterdagi hammasi",
+      "Eng arzon taklif tavsiyasi",
+    ],
+  },
+];
+
+export const CUSTOM_PLAN = {
+  name: "Custom",
+  price: "Kelishuv",
+  points: ["API", "Bir nechta foydalanuvchi", "Integratsiya", "Alohida yordam"],
 };
 
 const PREFS_KEY = "pomidor-prefs";
@@ -15,7 +56,7 @@ export type AccountPrefs = Pick<UserProfile, "phone" | "region" | "alerts" | "pl
 export const DEFAULT_PREFS: AccountPrefs = {
   phone: "",
   region: REGIONS[0],
-  alerts: true,
+  alerts: false,
   plan: "free",
 };
 
