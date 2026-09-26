@@ -1,13 +1,13 @@
 import { Headphones, Send, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
-import { localMarketReply } from "./lib/localReply";
+import { isGreeting, localMarketReply } from "./lib/localReply";
 import type { MarketSnapshot } from "./lib/marketSnapshot";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
 const STARTER: ChatMessage = {
   role: "assistant",
-  content: "Tanlangan tovar qatorini o‘qiyman: trend, mavsum, oxirgi oy. So‘rang — sayt tahliliga qarab aytaman.",
+  content: "Assalomu alaykum. Bozor, narx yoki P2P haqida qisqa so'rang.",
 };
 
 type SiteAssistantProps = {
@@ -54,6 +54,11 @@ export default function SiteAssistant({ snapshot }: SiteAssistantProps) {
     setBusy(true);
     setError("");
     const local = localMarketReply(content, snapshot);
+    if (isGreeting(content) || /rahmat|tashakkur/i.test(content)) {
+      setMessages([...next, { role: "assistant", content: local }]);
+      setBusy(false);
+      return;
+    }
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
@@ -101,8 +106,8 @@ export default function SiteAssistant({ snapshot }: SiteAssistantProps) {
                 key={`${item.role}-${index}`}
                 className={
                   item.role === "user"
-                    ? "ml-6 rounded-[10px] bg-accent px-3 py-2 text-sm text-on-accent"
-                    : "mr-6 rounded-[10px] bg-subtle px-3 py-2 text-sm text-ink"
+                    ? "ml-6 whitespace-pre-wrap break-words rounded-[10px] bg-accent px-3 py-2 text-sm text-on-accent [font-family:system-ui,sans-serif]"
+                    : "mr-6 whitespace-pre-wrap break-words rounded-[10px] bg-subtle px-3 py-2 text-sm text-ink [font-family:system-ui,sans-serif]"
                 }
               >
                 {item.content}
