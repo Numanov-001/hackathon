@@ -173,11 +173,11 @@ export default function P2PBoard({
         </p>
       )}
 
-      <div className="hidden px-4 md:block sm:px-5">
-        <table className="w-full text-left text-sm">
+      <div className="hidden overflow-x-auto px-4 lg:block sm:px-5">
+        <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="sticky top-[var(--p2p-head,0)]">
             <tr className="border-b border-line text-[13px] text-muted">
-              <th className="py-3 pr-3 font-medium">Kim</th>
+              <th className="sticky left-0 bg-surface py-3 pr-3 font-medium">Kim</th>
               <th className="py-3 pr-3 font-medium">Narx</th>
               <th className="py-3 pr-3 font-medium">Miqdor</th>
               <th className="py-3 pr-3 font-medium">Hudud</th>
@@ -189,7 +189,7 @@ export default function P2PBoard({
               const lot = formatLot(offer.available, offer.unit);
               return (
                 <tr key={offer.id} className="border-b border-line last:border-b-0 hover:bg-subtle">
-                  <td className="py-3 pr-3">
+                  <td className="sticky left-0 bg-surface py-3 pr-3">
                     <p className="font-semibold text-ink">{offer.seller}</p>
                     <p className="text-[13px] text-muted">{offer.productName} · {offer.payment} · <time dateTime={offer.postedAt}>{formatPosted(offer.postedAt)}</time></p>
                   </td>
@@ -209,20 +209,31 @@ export default function P2PBoard({
         </table>
       </div>
 
-      <div className="grid gap-0 divide-y divide-line px-4 md:hidden sm:px-5">
+      <div className="grid gap-0 divide-y divide-line px-4 lg:hidden sm:px-5">
         {offers.map((offer) => {
           const lot = formatLot(offer.available, offer.unit);
           return (
-            <article key={offer.id} className="py-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-semibold text-ink">{offer.seller}</p>
-                  <p className="text-[13px] text-muted">{offer.productName} · {offer.region}</p>
-                </div>
-                <p className="tabular text-right font-semibold">{formatPrice(offer.price)} <span className="block text-[13px] font-medium text-muted">{priceUnit(offer.unit)}</span></p>
+            <article key={offer.id} className="grid gap-2 py-4">
+              <div className="min-w-0">
+                <p className="text-[13px] text-muted">Kim</p>
+                <p className="break-words text-base font-semibold text-ink">{offer.seller}</p>
+                <p className="text-[13px] text-muted">{offer.productName} · {offer.payment} · <time dateTime={offer.postedAt}>{formatPosted(offer.postedAt)}</time></p>
               </div>
-              <p className="mt-2 text-sm text-ink">{lot.primary} <span className="text-muted">· {lot.secondary}</span></p>
-              <PhoneCell phone={offer.phone} contacts={contacts} onUnlock={onUnlock} className="mt-2" />
+              <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+                <div>
+                  <dt className="text-[13px] text-muted">Narx</dt>
+                  <dd className="tabular font-semibold text-ink">{formatPrice(offer.price)} <span className="text-[13px] font-medium text-muted">{priceUnit(offer.unit)}</span></dd>
+                </div>
+                <div>
+                  <dt className="text-[13px] text-muted">Miqdor</dt>
+                  <dd className="font-semibold text-ink">{lot.primary} <span className="block text-[13px] font-medium text-muted">{lot.secondary}</span></dd>
+                </div>
+                <div className="col-span-2">
+                  <dt className="text-[13px] text-muted">Hudud</dt>
+                  <dd className="font-semibold text-ink">{offer.region}</dd>
+                </div>
+              </dl>
+              <PhoneCell phone={offer.phone} contacts={contacts} onUnlock={onUnlock} />
             </article>
           );
         })}
