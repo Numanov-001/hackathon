@@ -1,6 +1,5 @@
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://YOUR-BACKEND.example/api/:path*" },
-    { "source": "/health", "destination": "https://YOUR-BACKEND.example/health" }
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

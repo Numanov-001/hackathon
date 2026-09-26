@@ -3,6 +3,9 @@
 **/*.pyc
 **/.venv/
 **/.env
+!frontend/.env
+**/.env.local
+**/.env*.local
 **/*.db
 **/.pytest_cache/
 

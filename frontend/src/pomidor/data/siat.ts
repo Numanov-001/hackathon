@@ -99,7 +99,7 @@ function fromTable(html: string) {
   return { months: latest, rows };
 }
 
-export function productsFromSiat(months = [...SIAT_MONTHS], rows = SIAT_ROWS) {
+export function productsFromSiat(months: string[] = [...SIAT_MONTHS], rows = SIAT_ROWS) {
   return Object.keys(NAMES).map((id) => productFromSeries(id, rows[id], months));
 }
 

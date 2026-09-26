@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { getJson } from "../../api/client";
-import { applyImages } from "../data/media";
+import { applyImages, loadImages } from "../data/media";
 import { PRODUCTS } from "../data/products";
+import { fetchRemoteImages } from "../data/supabaseApi";
 import type { Product } from "../types";
 
 function asProduct(row: Product): Product {
@@ -23,15 +24,17 @@ export function useSiatProducts() {
 
   useEffect(() => {
     let cancelled = false;
-    getJson("/api/desk/catalog")
-      .then((rows) => {
-        if (cancelled || !Array.isArray(rows) || rows.length === 0) return;
-        setProducts(applyImages(rows.map((row) => asProduct(row as Product))));
-        setLive(true);
-      })
-      .catch(() => {
-        if (!cancelled) setLive(false);
-      });
+    Promise.all([
+      getJson("/api/desk/catalog").catch(() => null),
+      fetchRemoteImages(),
+    ]).then(([rows, remote]) => {
+      if (cancelled) return;
+      const images = { ...loadImages(), ...(remote ?? {}) };
+      const fromDesk = Array.isArray(rows) && rows.length > 0;
+      const base = fromDesk ? (rows as Product[]).map((row) => asProduct(row)) : PRODUCTS;
+      setProducts(applyImages(base, images));
+      setLive(fromDesk);
+    });
     return () => {
       cancelled = true;
     };

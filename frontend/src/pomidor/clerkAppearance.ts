@@ -1,4 +1,10 @@
-import type { Appearance } from "@clerk/react";
+import type { ComponentProps } from "react";
+import type { ClerkProvider } from "@clerk/react";
+
+type Appearance = NonNullable<ComponentProps<typeof ClerkProvider>["appearance"]> & {
+  layout?: Record<string, unknown>;
+  options?: Record<string, unknown>;
+};
 
 /** Clerk modal: email + password + Google, marketch.uz tokens, no Clerk marks. */
 export const clerkAppearance: Appearance = {
@@ -16,13 +22,12 @@ export const clerkAppearance: Appearance = {
   },
   variables: {
     colorPrimary: "#146B43",
-    colorText: "#1C2420",
-    colorTextSecondary: "#4E5A54",
+    colorForeground: "#1C2420",
+    colorMutedForeground: "#4E5A54",
     colorBackground: "#FFFFFF",
-    colorInputBackground: "#FFFFFF",
-    colorInputText: "#1C2420",
+    colorInput: "#FFFFFF",
+    colorInputForeground: "#1C2420",
     colorNeutral: "#4E5A54",
-    borderRadius: "10px",
     fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
   },
   elements: {

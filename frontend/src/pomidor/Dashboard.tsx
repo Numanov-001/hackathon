@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import AccountPage from "./AccountPage";
 import { DEFAULT_PREFS, loadPrefs, savePrefs, type AccountPrefs } from "./data/profile";
+import { MOCK_SOURCE } from "./data/catalog";
 import { type P2POffer, type P2PSide } from "./data/p2p";
+import { hasSupabase } from "./lib/supabase";
 import { productById } from "./data/products";
 import { useDeskOffers, type DeskOfferDraft } from "./hooks/useDeskOffers";
 import { useSiatProducts } from "./hooks/useSiatProducts";
@@ -10,8 +12,9 @@ import { priceUnit } from "./lib/unit";
 import MarketOverview from "./MarketOverview";
 import Navbar from "./Navbar";
 import P2PBoard from "./P2PBoard";
-import P2PSidebar from "./P2PSidebar";
 import ProductTable from "./ProductTable";
+import { buildMarketSnapshot } from "./lib/marketSnapshot";
+import SiteAssistant from "./SiteAssistant";
 import Toast from "./Toast";
 import WelcomeSplash from "./WelcomeSplash";
 import type { NavId, UserProfile } from "./types";
@@ -67,8 +70,6 @@ export default function Dashboard({
     if (minQty && offer.available < Number(minQty)) return false;
     return true;
   }).sort((a, b) => a.price - b.price);
-  const kgOffers = offers.filter((item) => item.unit === "kg");
-  const offerAvg = Math.round(kgOffers.reduce((sum, item) => sum + item.price, 0) / (kgOffers.length || 1));
 
   useEffect(() => {
     setPrefs(loadPrefs());
@@ -176,35 +177,28 @@ export default function Dashboard({
           <ProductTable products={products} onSelect={openProduct} />
         )}
         {section === "p2p" && (
-          <div className="grid items-start gap-4 lg:grid-cols-12">
-            <div className="lg:col-span-4">
-              <P2PSidebar offers={offers} avg={offerAvg} />
-            </div>
-            <div className="lg:col-span-8">
-              <P2PBoard
-                side={side}
-                onSide={setSide}
-                productId={p2pProduct}
-                onProduct={(id) => { setP2pProduct(id); if (id) setProductId(id); }}
-                region={p2pRegion}
-                onRegion={setP2pRegion}
-                payment={p2pPayment}
-                onPayment={setP2pPayment}
-                maxPrice={maxPrice}
-                onMaxPrice={setMaxPrice}
-                minQty={minQty}
-                onMinQty={setMinQty}
-                products={products}
-                offers={filtered}
-                postOpen={postOpen}
-                onPost={openPost}
-                onClosePost={() => setPostOpen(false)}
-                posterName={profile.name}
-                posterPhone={profile.phone}
-                onPublish={publishAd}
-              />
-            </div>
-          </div>
+          <P2PBoard
+            side={side}
+            onSide={setSide}
+            productId={p2pProduct}
+            onProduct={(id) => { setP2pProduct(id); if (id) setProductId(id); }}
+            region={p2pRegion}
+            onRegion={setP2pRegion}
+            payment={p2pPayment}
+            onPayment={setP2pPayment}
+            maxPrice={maxPrice}
+            onMaxPrice={setMaxPrice}
+            minQty={minQty}
+            onMinQty={setMinQty}
+            products={products}
+            offers={filtered}
+            postOpen={postOpen}
+            onPost={openPost}
+            onClosePost={() => setPostOpen(false)}
+            posterName={profile.name}
+            posterPhone={profile.phone}
+            onPublish={publishAd}
+          />
         )}
         {section === "obuna" && isSignedIn && (
           <AccountPage
@@ -223,7 +217,10 @@ export default function Dashboard({
           />
         )}
       </main>
-      <footer className="mx-auto w-full max-w-[1440px] px-4 pb-24 lg:px-6 lg:pb-8" />
+      <footer className="mx-auto flex w-full max-w-[1440px] justify-between gap-4 px-4 pb-24 text-[13px] text-muted lg:px-6 lg:pb-8">
+        <p>{MOCK_SOURCE.label}</p>
+        <p>{hasSupabase() ? "Rasmlar Supabase’da" : MOCK_SOURCE.note}</p>
+      </footer>
       <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-line bg-surface lg:hidden" aria-label="Pastki menyu">
         {[
           ["bozor", "Bozor"],
@@ -240,6 +237,7 @@ export default function Dashboard({
           </button>
         ))}
       </nav>
+      {isSignedIn && product && <SiteAssistant snapshot={buildMarketSnapshot(product, products)} />}
       <Toast message={toast} />
     </div>
   );
