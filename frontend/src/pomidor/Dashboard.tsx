@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import AccountPage from "./AccountPage";
 import { DEFAULT_PREFS, loadPrefs, savePrefs, type AccountPrefs } from "./data/profile";
-import { MOCK_SOURCE } from "./data/catalog";
-import { buildOffers, type P2POffer, type P2PSide } from "./data/p2p";
+import { type P2POffer, type P2PSide } from "./data/p2p";
 import { productById } from "./data/products";
+import { useDeskOffers, type DeskOfferDraft } from "./hooks/useDeskOffers";
 import { useSiatProducts } from "./hooks/useSiatProducts";
 import { formatPrice } from "./lib/format";
 import { priceUnit } from "./lib/unit";
@@ -34,14 +34,16 @@ export default function Dashboard({
   openSignIn,
 }: DashboardProps) {
   const { products, live } = useSiatProducts();
+  const { offers, publish } = useDeskOffers(products);
   const [section, setSection] = useState<NavId>("bozor");
   const [menuOpen, setMenuOpen] = useState(false);
   const [productId, setProductId] = useState("pomidor");
   const [prefs, setPrefs] = useState<AccountPrefs>(DEFAULT_PREFS);
-  const [pending, setPending] = useState<NavId | "trade" | null>(null);
+  const [pending, setPending] = useState<NavId | "trade" | "post" | null>(null);
+  const [postOpen, setPostOpen] = useState(false);
   const [pendingOffer, setPendingOffer] = useState<P2POffer | null>(null);
   const [side, setSide] = useState<P2PSide>("buy");
-  const [p2pProduct, setP2pProduct] = useState("");
+  const [p2pProduct, setP2pProduct] = useState("pomidor");
   const [p2pRegion, setP2pRegion] = useState("");
   const [p2pPayment, setP2pPayment] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
@@ -56,7 +58,6 @@ export default function Dashboard({
   };
 
   const product = useMemo(() => productById(products, productId), [products, productId]);
-  const offers = useMemo(() => buildOffers(products), [products]);
   const filtered = offers.filter((offer) => {
     if (side === "buy" ? offer.side !== "sell" : offer.side !== "buy") return false;
     if (p2pProduct && offer.productId !== p2pProduct) return false;
@@ -65,7 +66,7 @@ export default function Dashboard({
     if (maxPrice && offer.price > Number(maxPrice)) return false;
     if (minQty && offer.available < Number(minQty)) return false;
     return true;
-  });
+  }).sort((a, b) => a.price - b.price);
   const kgOffers = offers.filter((item) => item.unit === "kg");
   const offerAvg = Math.round(kgOffers.reduce((sum, item) => sum + item.price, 0) / (kgOffers.length || 1));
 
@@ -82,6 +83,7 @@ export default function Dashboard({
   useEffect(() => {
     if (!isSignedIn || !pending) return;
     if (pending === "trade" && pendingOffer) finishTrade(pendingOffer);
+    if (pending === "post") setPostOpen(true);
     if (pending === "obuna" || pending === "profil") setSection(pending);
     setPending(null);
     setPendingOffer(null);
@@ -107,7 +109,7 @@ export default function Dashboard({
     setMenuOpen(false);
   }
 
-  function needAuth(next: NavId | "trade", offer?: P2POffer) {
+  function needAuth(next: NavId | "trade" | "post", offer?: P2POffer) {
     if (isSignedIn) return false;
     setPending(next);
     setPendingOffer(offer ?? null);
@@ -130,9 +132,17 @@ export default function Dashboard({
     showToast(`${offer.seller} · ${offer.productName} · ${formatPrice(offer.price)} ${priceUnit(offer.unit)}`);
   }
 
-  function trade(offer: P2POffer) {
-    if (needAuth("trade", offer)) return;
-    finishTrade(offer);
+  function openPost() {
+    if (needAuth("post")) return;
+    setPostOpen(true);
+  }
+
+  async function publishAd(draft: DeskOfferDraft) {
+    await publish(draft);
+    setSide(draft.side === "sell" ? "buy" : "sell");
+    setP2pProduct(draft.productId);
+    setPostOpen(false);
+    showToast("E’lon joylandi. Telefoningiz ro‘yxatda ko‘rinadi.");
   }
 
   return (
@@ -148,7 +158,6 @@ export default function Dashboard({
         onMenu={setMenuOpen}
         clerkEnabled={clerkEnabled}
         isSignedIn={isSignedIn}
-        alerts={prefs.alerts}
         products={products}
         onOpenProduct={openProduct}
         onNeedClerk={askClerk}
@@ -187,7 +196,12 @@ export default function Dashboard({
                 onMinQty={setMinQty}
                 products={products}
                 offers={filtered}
-                onTrade={trade}
+                postOpen={postOpen}
+                onPost={openPost}
+                onClosePost={() => setPostOpen(false)}
+                posterName={profile.name}
+                posterPhone={profile.phone}
+                onPublish={publishAd}
               />
             </div>
           </div>
@@ -196,7 +210,7 @@ export default function Dashboard({
           <AccountPage
             mode="sozlamalar"
             profile={profile}
-            onChange={(next) => setPrefs({ phone: next.phone, region: next.region, alerts: next.alerts, plan: next.plan })}
+            onChange={(next) => setPrefs({ phone: next.phone, region: next.region, alerts: next.alerts, plan: "free" })}
             onSave={saveAccount}
           />
         )}
@@ -204,15 +218,12 @@ export default function Dashboard({
           <AccountPage
             mode="profil"
             profile={profile}
-            onChange={(next) => setPrefs({ phone: next.phone, region: next.region, alerts: next.alerts, plan: next.plan })}
+            onChange={(next) => setPrefs({ phone: next.phone, region: next.region, alerts: next.alerts, plan: "free" })}
             onSave={saveAccount}
           />
         )}
       </main>
-      <footer className="mx-auto flex w-full max-w-[1440px] justify-between gap-4 px-4 pb-24 text-[13px] text-muted lg:px-6 lg:pb-8">
-        <p>{MOCK_SOURCE.label}</p>
-        <p>{MOCK_SOURCE.note}</p>
-      </footer>
+      <footer className="mx-auto w-full max-w-[1440px] px-4 pb-24 lg:px-6 lg:pb-8" />
       <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-line bg-surface lg:hidden" aria-label="Pastki menyu">
         {[
           ["bozor", "Bozor"],

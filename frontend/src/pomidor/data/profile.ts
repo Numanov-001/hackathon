@@ -1,11 +1,12 @@
 import type { PlanId, UserProfile } from "../types";
 import { REGIONS } from "./siat";
 
-export const PLANS: Array<{ id: PlanId; name: string; price: string; points: string[] }> = [
-  { id: "free", name: "Bepul", price: "0 UZS", points: ["Joriy narxlar", "P2P e’lonlarni ko‘rish"] },
-  { id: "plus", name: "Plus", price: "29 000 UZS/oy", points: ["Viloyat bo‘yicha haftalik hisobot", "10% narx ogohlantirishi"] },
-  { id: "pro", name: "Pro", price: "79 000 UZS/oy", points: ["Plus imkoniyatlari", "P2P e’lon bildirishnomalari", "Ustuvor listing"] },
-];
+export const FREE_PLAN = {
+  id: "free" as const,
+  name: "Bepul",
+  price: "0 UZS",
+  points: ["Joriy narxlar", "P2P e’lonlarni ko‘rish"],
+};
 
 const PREFS_KEY = "pomidor-prefs";
 
@@ -18,6 +19,10 @@ export const DEFAULT_PREFS: AccountPrefs = {
   plan: "free",
 };
 
+function asPlan(_value: unknown): PlanId {
+  return "free";
+}
+
 export function loadPrefs(): AccountPrefs {
   try {
     localStorage.removeItem("pomidor-session");
@@ -28,7 +33,7 @@ export function loadPrefs(): AccountPrefs {
       phone: String(parsed.phone ?? ""),
       region: String(parsed.region || DEFAULT_PREFS.region),
       alerts: Boolean(parsed.alerts),
-      plan: parsed.plan === "plus" || parsed.plan === "pro" ? parsed.plan : "free",
+      plan: asPlan(parsed.plan),
     };
   } catch {
     return DEFAULT_PREFS;
@@ -36,5 +41,5 @@ export function loadPrefs(): AccountPrefs {
 }
 
 export function savePrefs(prefs: AccountPrefs) {
-  localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+  localStorage.setItem(PREFS_KEY, JSON.stringify({ ...prefs, plan: "free" as const }));
 }

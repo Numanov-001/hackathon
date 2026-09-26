@@ -2,9 +2,9 @@ import { SignInButton, UserButton } from "@clerk/react";
 import { clerkAppearance } from "./clerkAppearance";
 import { ArrowLeftRight, CreditCard, Menu, Package, Store, UserRound, X } from "lucide-react";
 import Logo from "./Logo";
-import Notifications from "./Notifications";
 import ProductSearch from "./ProductSearch";
 import { cn } from "./lib/cn";
+import { BRAND_NAME } from "./data/brand";
 import type { NavId, Product } from "./types";
 
 const ITEMS: Array<{ id: NavId; label: string; icon: typeof Store }> = [
@@ -23,7 +23,6 @@ type NavbarProps = {
   onMenu: (open: boolean) => void;
   clerkEnabled: boolean;
   isSignedIn: boolean;
-  alerts: boolean;
   products: Product[];
   onOpenProduct: (id: string) => void;
   onNeedClerk: () => void;
@@ -68,7 +67,6 @@ export default function Navbar({
   onMenu,
   clerkEnabled,
   isSignedIn,
-  alerts,
   products,
   onOpenProduct,
   onNeedClerk,
@@ -79,9 +77,9 @@ export default function Navbar({
         <button type="button" className="grid h-10 w-10 place-items-center rounded-[6px] text-ink lg:hidden" onClick={() => onMenu(!menuOpen)} aria-label="Menyu">
           {menuOpen ? <X size={20} strokeWidth={1.8} /> : <Menu size={20} strokeWidth={1.8} />}
         </button>
-        <button type="button" className="flex items-center gap-2" onClick={() => onSection("bozor")}>
+        <button type="button" className="flex items-center gap-2" onClick={() => onSection("bozor")} aria-label={BRAND_NAME}>
           <Logo />
-          <span className="text-xl font-semibold tracking-tight text-ink">Pomidor</span>
+          <span className="text-xl font-semibold tracking-tight text-ink">{BRAND_NAME}</span>
         </button>
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Asosiy">
           {[...ITEMS, ...(isSignedIn ? ACCOUNT_ITEMS : [])].map((item) => {
@@ -106,7 +104,6 @@ export default function Navbar({
         </nav>
         <ProductSearch products={products} onOpenProduct={onOpenProduct} />
         <div className="ml-auto flex items-center gap-3">
-          {isSignedIn && <Notifications products={products} enabled={alerts} onOpenProduct={onOpenProduct} />}
           <div className="hidden h-8 w-px bg-line sm:block" />
           {isSignedIn && clerkEnabled ? (
             <UserButton />

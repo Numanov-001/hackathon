@@ -1,6 +1,6 @@
 import type { Appearance } from "@clerk/react";
 
-/** Clerk modal: email + password + Google, Pomidor tokens, no Clerk marks. */
+/** Clerk modal: email + password + Google, marketch.uz tokens, no Clerk marks. */
 export const clerkAppearance: Appearance = {
   layout: {
     socialButtonsPlacement: "top",

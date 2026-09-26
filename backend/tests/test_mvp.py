@@ -121,3 +121,39 @@ def test_websocket_new_offer(client):
         assert event["type"] == "new_offer"
         assert event["data"]["order_type"] == "ASK"
         assert str(event["data"]["price"]).startswith("5300")
+
+
+def test_desk_catalog_and_offers(db, client):
+    from app.services.desk_catalog import seed_desk
+
+    seed_desk(db)
+    db.commit()
+    catalog = client.get("/api/desk/catalog").json()
+    assert len(catalog) == 10
+    pomidor = next(item for item in catalog if item["id"] == "pomidor")
+    assert len(pomidor["chartData"]) == 24
+    assert pomidor["price"] > 0
+    offers = client.get("/api/desk/offers").json()
+    assert len(offers) >= 10
+    assert {item["side"] for item in offers} == {"buy", "sell"}
+    assert offers[0]["phone"].startswith("+998")
+    posted = client.post(
+        "/api/desk/offers",
+        json={
+            "productId": "pomidor",
+            "region": "Samarqand",
+            "side": "sell",
+            "price": "9000",
+            "quantity": "2000",
+            "phone": "901112233",
+            "name": "Test dehqon",
+            "payment": "Naqd",
+        },
+    )
+    assert posted.status_code == 200
+    body = posted.json()
+    assert body["phone"] == "+998901112233"
+    assert body["side"] == "sell"
+    assert body["available"] == 2000
+    missing = client.post("/api/desk/offers", json={"productId": "pomidor", "side": "buy", "price": "1", "quantity": "1", "phone": "12", "region": "Samarqand"})
+    assert missing.status_code == 400

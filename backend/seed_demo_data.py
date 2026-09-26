@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal, init_db
 from app.models import Offer, OfferStatus, OrderType, Product, Region, User, UserRole
+from app.services.desk_catalog import seed_desk
 
 PRODUCTS = [
     {"name": "Tomato", "category": "Meva va sabzavotlar", "unit": "kg"},
@@ -133,6 +134,9 @@ def main() -> None:
     db = SessionLocal()
     try:
         stats = seed(db)
+        desk = seed_desk(db)
+        stats["desk_products"] = desk["products"]
+        stats["desk_offers"] = desk["offers_added"]
         db.commit()
     finally:
         db.close()

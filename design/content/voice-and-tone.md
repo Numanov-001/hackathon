@@ -1,6 +1,6 @@
 ## Voice and tone
 
-Bozor-Analitika speaks like a market clerk: short, concrete, and calm. Prices are estimates and intentions, not guaranteed trades.
+marketch.uz speaks like a market clerk: short, concrete, and calm. Prices are estimates and intentions, not guaranteed trades.
 
 ### Principles
 

@@ -1,9 +1,10 @@
-import { BadgeCheck } from "lucide-react";
 import { PAYMENTS, REGIONS, type P2POffer, type P2PSide } from "./data/p2p";
+import P2PPost from "./P2PPost";
 import { formatPrice } from "./lib/format";
-import { formatPosted, priceUnit, UNIT_LABEL } from "./lib/unit";
+import { formatLot, formatPhone, formatPosted, phoneHref, priceUnit } from "./lib/unit";
 import { cn } from "./lib/cn";
 import Select from "./Select";
+import type { DeskOfferDraft } from "./hooks/useDeskOffers";
 import type { Product } from "./types";
 
 type P2PBoardProps = {
@@ -21,7 +22,12 @@ type P2PBoardProps = {
   onMinQty: (value: string) => void;
   products: Product[];
   offers: P2POffer[];
-  onTrade: (offer: P2POffer) => void;
+  postOpen: boolean;
+  onPost: () => void;
+  onClosePost: () => void;
+  posterName: string;
+  posterPhone: string;
+  onPublish: (draft: DeskOfferDraft) => Promise<void>;
 };
 
 const field = "h-11 rounded-[6px] border border-line bg-surface px-3 text-sm text-ink outline-none focus:border-accent";
@@ -41,15 +47,25 @@ export default function P2PBoard({
   onMinQty,
   products,
   offers,
-  onTrade,
+  postOpen,
+  onPost,
+  onClosePost,
+  posterName,
+  posterPhone,
+  onPublish,
 }: P2PBoardProps) {
   return (
     <section className="rounded-[10px] border border-line bg-surface p-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-ink">P2P niyatlar</h2>
-          <p className="text-[13px] text-muted">Sotib olish va sotish e’lonlari. Bu savdo emas.</p>
+          <h2 className="text-lg font-semibold text-ink">P2P</h2>
+          <p className="text-[13px] text-muted">
+            {side === "buy" ? "Sotuvchilar, arzonidan qimmatiga." : "Xaridorlar, arzonidan qimmatiga."} Telefon orqali bog‘lanasiz.
+          </p>
         </div>
+        <button type="button" onClick={onPost} className="inline-flex h-10 items-center rounded-[6px] bg-accent px-4 text-sm font-semibold text-on-accent hover:bg-accent-hover">
+          E’lon qo‘yish
+        </button>
         <div className="flex rounded-[6px] bg-subtle p-1">
           <button type="button" onClick={() => onSide("buy")} className={cn("min-h-10 rounded-[6px] px-4 text-sm font-semibold transition-colors duration-150", side === "buy" ? "bg-accent text-on-accent" : "text-muted")}>
             Sotib olish
@@ -60,7 +76,18 @@ export default function P2PBoard({
         </div>
       </div>
 
-      <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
+      {postOpen && (
+        <P2PPost
+          products={products}
+          defaultName={posterName}
+          defaultPhone={posterPhone}
+          defaultProductId={productId || products[0]?.id || ""}
+          onClose={onClosePost}
+          onSubmit={onPublish}
+        />
+      )}
+
+      <div className="relative z-20 mb-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
         <div className="grid gap-1 text-[13px] font-medium text-muted">
           Mahsulot
           <Select
@@ -103,79 +130,58 @@ export default function P2PBoard({
       </div>
 
       <div className="hidden overflow-x-auto md:block">
-        <table className="w-full min-w-[1040px] text-left text-sm">
+        <table className="w-full min-w-[860px] text-left text-sm">
           <thead>
             <tr className="text-[13px] text-muted">
-              <th className="pb-3 pr-3 font-medium">Sotuvchi</th>
-              <th className="pb-3 pr-3 font-medium">Sana</th>
+              <th className="pb-3 pr-3 font-medium">Kim</th>
               <th className="pb-3 pr-3 font-medium">Narx</th>
-              <th className="pb-3 pr-3 font-medium">Mavjud</th>
-              <th className="pb-3 pr-3 font-medium">Limit</th>
-              <th className="pb-3 pr-3 font-medium">To‘lov</th>
-              <th className="pb-3 font-medium" />
+              <th className="pb-3 pr-3 font-medium">Miqdor</th>
+              <th className="pb-3 pr-3 font-medium">Hudud</th>
+              <th className="pb-3 font-medium">Telefon</th>
             </tr>
           </thead>
           <tbody>
-            {offers.map((offer) => (
-              <tr key={offer.id} className="border-t border-line hover:bg-subtle">
-                <td className="py-3.5 pr-3">
-                  <p className="inline-flex items-center gap-1.5 font-semibold text-ink">
-                    {offer.seller}
-                    {offer.verified && <BadgeCheck size={14} className="text-accent" />}
-                  </p>
-                  <p className="text-[13px] text-muted">{offer.rating}% · {offer.trades} savdo · {offer.region}</p>
-                </td>
-                <td className="tabular py-3.5 pr-3 text-muted">
-                  <time dateTime={offer.postedAt}>{formatPosted(offer.postedAt)}</time>
-                </td>
-                <td className="tabular py-3.5 pr-3 font-semibold">{formatPrice(offer.price)} <span className="text-[13px] font-medium text-muted">{priceUnit(offer.unit)}</span></td>
-                <td className="py-3.5 pr-3">{offer.available} {UNIT_LABEL[offer.unit]} · {offer.productName}</td>
-                <td className="py-3.5 pr-3 text-muted">{offer.minQty}–{offer.maxQty} {UNIT_LABEL[offer.unit]}</td>
-                <td className="py-3.5 pr-3"><span className="rounded-full bg-subtle px-2 py-0.5 text-[13px] font-medium text-ink">{offer.payment}</span></td>
-                <td className="py-3.5 text-right">
-                  <button
-                    type="button"
-                    onClick={() => onTrade(offer)}
-                    className={cn(
-                      "h-10 rounded-[6px] px-4 text-sm font-semibold text-on-accent transition-colors duration-150",
-                      side === "buy" ? "bg-accent hover:bg-accent-hover" : "bg-ink hover:bg-ink/90",
-                    )}
-                  >
-                    {side === "buy" ? "Sotib olish" : "Sotish"}
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {offers.map((offer) => {
+              const lot = formatLot(offer.available, offer.unit);
+              return (
+                <tr key={offer.id} className="border-t border-line">
+                  <td className="py-3.5 pr-3">
+                    <p className="font-semibold text-ink">{offer.seller}</p>
+                    <p className="text-[13px] text-muted">{offer.productName} · {offer.payment} · <time dateTime={offer.postedAt}>{formatPosted(offer.postedAt)}</time></p>
+                  </td>
+                  <td className="tabular py-3.5 pr-3 font-semibold">{formatPrice(offer.price)} <span className="text-[13px] font-medium text-muted">{priceUnit(offer.unit)}</span></td>
+                  <td className="py-3.5 pr-3">
+                    <p className="font-semibold text-ink">{lot.primary}</p>
+                    <p className="text-[13px] text-muted">{lot.secondary}</p>
+                  </td>
+                  <td className="py-3.5 pr-3 text-ink">{offer.region}</td>
+                  <td className="py-3.5">
+                    <a href={phoneHref(offer.phone)} className="font-semibold text-accent underline-offset-2 hover:underline">{formatPhone(offer.phone)}</a>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
 
       <div className="grid gap-3 md:hidden">
-        {offers.map((offer) => (
-          <article key={offer.id} className="rounded-[10px] border border-line p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="inline-flex items-center gap-1 font-semibold">{offer.seller}{offer.verified && <BadgeCheck size={14} className="text-accent" />}</p>
-                <p className="text-[13px] text-muted">{offer.rating}% · {offer.trades} savdo</p>
+        {offers.map((offer) => {
+          const lot = formatLot(offer.available, offer.unit);
+          return (
+            <article key={offer.id} className="rounded-[10px] border border-line p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-ink">{offer.seller}</p>
+                  <p className="text-[13px] text-muted">{offer.productName} · {offer.region}</p>
+                </div>
+                <p className="tabular text-right font-semibold">{formatPrice(offer.price)} <span className="block text-[13px] font-medium text-muted">{priceUnit(offer.unit)}</span></p>
               </div>
-              <p className="tabular text-right font-semibold">{formatPrice(offer.price)} <span className="block text-[13px] font-medium text-muted">{priceUnit(offer.unit)}</span></p>
-            </div>
-            <p className="mt-3 text-sm text-muted">
-              {offer.productName} · {offer.available} {UNIT_LABEL[offer.unit]} · {offer.minQty}–{offer.maxQty} {UNIT_LABEL[offer.unit]} ·{" "}
-              <time dateTime={offer.postedAt}>{formatPosted(offer.postedAt)}</time>
-            </p>
-            <div className="mt-3 flex items-center justify-between gap-3">
-              <span className="rounded-full bg-subtle px-2 py-0.5 text-[13px]">{offer.payment} · {offer.region}</span>
-              <button
-                type="button"
-                onClick={() => onTrade(offer)}
-                className={cn("h-10 rounded-[6px] px-4 text-sm font-semibold text-on-accent", side === "buy" ? "bg-accent" : "bg-ink")}
-              >
-                {side === "buy" ? "Sotib olish" : "Sotish"}
-              </button>
-            </div>
-          </article>
-        ))}
+              <p className="mt-3 text-sm text-ink">{lot.primary} <span className="text-muted">· {lot.secondary}</span></p>
+              <a href={phoneHref(offer.phone)} className="mt-3 inline-flex h-11 items-center font-semibold text-accent underline-offset-2 hover:underline">{formatPhone(offer.phone)}</a>
+            </article>
+          );
+        })}
       </div>
       {offers.length === 0 && <p className="py-8 text-center text-sm text-muted">Mos e’lon topilmadi. Filtrlarni kengaytiring.</p>}
     </section>

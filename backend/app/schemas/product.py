@@ -14,6 +14,7 @@ class ProductRead(BaseModel):
 
     id: int
     name: str
+    slug: str | None = None
     category: str
     unit: str
     created_at: datetime

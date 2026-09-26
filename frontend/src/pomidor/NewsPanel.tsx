@@ -17,7 +17,7 @@ export default function NewsPanel({ onOpenProduct }: NewsPanelProps) {
     <section className="rounded-[10px] border border-line bg-surface">
       <div className="border-b border-line px-4 py-3">
         <h2 className="text-base font-semibold text-ink">Mikroyangiliklar</h2>
-        <p className="text-[13px] text-muted">Qisqa fundamental izohlar. To‘liq lenta emas.</p>
+        <p className="text-[13px] text-muted">Mavsum va drayver. To‘liq lenta emas.</p>
       </div>
       <ul className="divide-y divide-line">
         {MARKET_NEWS.map((item) => {

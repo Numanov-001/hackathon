@@ -59,7 +59,7 @@ export default function Select({
   }
 
   return (
-    <div className="relative" ref={root}>
+    <div className={cn("relative", open && "z-30")} ref={root}>
       <button
         type="button"
         aria-haspopup="listbox"

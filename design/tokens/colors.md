@@ -1,6 +1,6 @@
 ## Color tokens
 
-Source of truth for Bozor-Analitika. Map these roles in `frontend/src/styles.css`. Do not introduce colors that are not listed here.
+Source of truth for marketch.uz. Map these roles in `frontend/src/styles.css`. Do not introduce colors that are not listed here.
 
 Jury demo desk: white canvas like a market terminal, forest accent, and separate sell/buy colors. High-chroma green is reserved for the primary action and positive price movement.
 

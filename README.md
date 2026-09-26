@@ -1,4 +1,4 @@
-# Bozor-Analitika
+# marketch.uz
 
 B2B market intelligence MVP for Uzbekistan agri markets.
 

@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Index, Numeric, func
+from sqlalchemy import DateTime, Enum, ForeignKey, Index, Numeric, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -39,6 +39,7 @@ class Offer(Base):
         server_default=func.now(),
     )
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    payment: Mapped[str | None] = mapped_column(String(32), nullable=True)
 
     product: Mapped["Product"] = relationship(back_populates="offers")
     region: Mapped["Region"] = relationship(back_populates="offers")

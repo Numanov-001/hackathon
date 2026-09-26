@@ -1,4 +1,4 @@
-# Bozor-Analitika design
+# marketch.uz design
 
 Visual and UX decisions for this product live in `design/`. Cursor applies them through the rules in `.cursor/rules/`.
 

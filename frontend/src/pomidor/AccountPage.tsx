@@ -1,9 +1,8 @@
-import { Bell, Mail, MapPin, Phone, Save, UserRound } from "lucide-react";
+import { Mail, MapPin, Phone, Save, UserRound } from "lucide-react";
 import { REGIONS } from "./data/products";
-import { PLANS } from "./data/profile";
+import { FREE_PLAN } from "./data/profile";
 import Select from "./Select";
-import { cn } from "./lib/cn";
-import type { PlanId, UserProfile } from "./types";
+import type { UserProfile } from "./types";
 
 type AccountPageProps = {
   mode: "profil" | "sozlamalar";
@@ -22,7 +21,7 @@ export default function AccountPage({ mode, profile, onChange, onSave }: Account
       <p className="mt-1 text-sm text-muted">
         {mode === "profil"
           ? "Ism va email Clerk hisobidan. Rol yo‘q."
-          : "Obuna va narx ogohlantirishi. Rol tanlash yo‘q."}
+          : "Hozir faqat bepul obuna. Pullik tariflar yo‘q."}
       </p>
       {mode === "profil" ? (
         <div className="mt-6 grid gap-4">
@@ -51,62 +50,28 @@ export default function AccountPage({ mode, profile, onChange, onSave }: Account
         </div>
       ) : (
         <div className="mt-6 grid gap-4">
-          <div>
-            <h3 className="text-sm font-semibold text-ink">Obuna</h3>
-            <p className="mt-1 text-sm text-muted">Haftalik hisobot {profile.email || "Gmail"} va {profile.region} bo‘yicha yuboriladi.</p>
-            <div className="mt-4 grid gap-3 md:grid-cols-3">
-              {PLANS.map((plan) => {
-                const active = profile.plan === plan.id;
-                return (
-                  <button
-                    key={plan.id}
-                    type="button"
-                    onClick={() => onChange({ ...profile, plan: plan.id as PlanId, alerts: plan.id === "free" ? profile.alerts : true })}
-                    className={cn(
-                      "rounded-[10px] border p-4 text-left transition-colors duration-150",
-                      active ? "border-accent bg-soft" : "border-line hover:border-accent",
-                    )}
-                  >
-                    <p className="flex items-center justify-between gap-2">
-                      <span className="font-semibold">{plan.name}</span>
-                      {active && <span className="rounded-full bg-soft px-2 py-0.5 text-[13px] font-semibold text-accent">Tanlangan</span>}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-accent">{plan.price}</p>
-                    <ul className="mt-3 grid gap-1.5 text-[13px] text-muted">
-                      {plan.points.map((point) => <li key={point}>• {point}</li>)}
-                    </ul>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          <label className="flex items-start gap-3 rounded-[10px] bg-subtle p-4">
-            <input
-              type="checkbox"
-              checked={profile.alerts}
-              onChange={(event) => onChange({ ...profile, alerts: event.target.checked })}
-              className="mt-1 h-4 w-4 accent-[var(--color-accent)]"
-            />
-            <span>
-              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink">
-                <Bell size={14} strokeWidth={1.8} />
-                Narx ogohlantirishi
-              </span>
-              <span className="mt-1 block text-sm text-muted">
-                Mahsulot 10% dan ko‘p o‘zgarsa, bildirishnomada ko‘rinadi.
-              </span>
-            </span>
-          </label>
+          <article className="rounded-[10px] border border-accent bg-soft p-4">
+            <p className="flex items-center justify-between gap-2">
+              <span className="font-semibold text-ink">{FREE_PLAN.name}</span>
+              <span className="rounded-full bg-surface px-2 py-0.5 text-[13px] font-semibold text-accent">Joriy</span>
+            </p>
+            <p className="mt-1 text-sm font-semibold text-accent">{FREE_PLAN.price}</p>
+            <ul className="mt-3 grid gap-1.5 text-[13px] text-muted">
+              {FREE_PLAN.points.map((point) => <li key={point}>{point}</li>)}
+            </ul>
+          </article>
         </div>
       )}
-      <button
-        type="button"
-        onClick={onSave}
-        className="mt-6 inline-flex h-12 items-center gap-2 rounded-[6px] bg-accent px-5 text-sm font-semibold text-on-accent hover:bg-accent-hover"
-      >
-        <Save size={16} strokeWidth={1.8} />
-        {mode === "sozlamalar" && profile.plan !== "free" ? "Obunani saqlash" : "Saqlash"}
-      </button>
+      {mode === "profil" && (
+        <button
+          type="button"
+          onClick={onSave}
+          className="mt-6 inline-flex h-12 items-center gap-2 rounded-[6px] bg-accent px-5 text-sm font-semibold text-on-accent hover:bg-accent-hover"
+        >
+          <Save size={16} strokeWidth={1.8} />
+          Saqlash
+        </button>
+      )}
     </section>
   );
 }

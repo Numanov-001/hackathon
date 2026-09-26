@@ -10,7 +10,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_name: str = "Bozor-Analitika"
+    app_name: str = "marketch.uz"
     app_env: str = "local"
     debug: bool = True
 

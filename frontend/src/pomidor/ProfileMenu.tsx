@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { ChevronDown, CreditCard, LogOut, UserRound } from "lucide-react";
 import Avatar from "./Avatar";
 import { cn } from "./lib/cn";
-import { PLANS } from "./data/profile";
+import { FREE_PLAN } from "./data/profile";
 import type { UserProfile } from "./types";
 
 type ProfileMenuProps = {
@@ -72,7 +72,7 @@ export default function ProfileMenu({ profile, onProfile, onSettings, onLogout }
           <Avatar name={profile.name} picture={profile.picture} size="md" />
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-ink">{profile.name}</p>
-            <p className="truncate text-[13px] text-muted">{PLANS.find((item) => item.id === profile.plan)?.name ?? "Bepul"}</p>
+            <p className="truncate text-[13px] text-muted">{FREE_PLAN.name}</p>
           </div>
         </div>
         <div className="my-1 h-px bg-line" />

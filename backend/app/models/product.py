@@ -8,6 +8,7 @@ from app.core.database import Base
 
 if TYPE_CHECKING:
     from app.models.offer import Offer
+    from app.models.price_bar import PriceBar
 
 
 class Product(Base):
@@ -15,6 +16,7 @@ class Product(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    slug: Mapped[str | None] = mapped_column(String(64), unique=True, index=True, nullable=True)
     category: Mapped[str] = mapped_column(String(128))
     unit: Mapped[str] = mapped_column(String(32), default="kg")
     created_at: Mapped[datetime] = mapped_column(
@@ -23,3 +25,4 @@ class Product(Base):
     )
 
     offers: Mapped[list["Offer"]] = relationship(back_populates="product")
+    price_bars: Mapped[list["PriceBar"]] = relationship(back_populates="product")

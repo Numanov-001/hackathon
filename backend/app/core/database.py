@@ -1,6 +1,6 @@
 from collections.abc import Generator
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from app.core.config import get_settings
@@ -29,7 +29,20 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 
+def _ensure_sqlite_columns() -> None:
+    if not settings.database_url.startswith("sqlite"):
+        return
+    with engine.begin() as conn:
+        cols = [row[1] for row in conn.execute(text("PRAGMA table_info(products)"))]
+        if cols and "slug" not in cols:
+            conn.execute(text("ALTER TABLE products ADD COLUMN slug VARCHAR(64)"))
+        offer_cols = [row[1] for row in conn.execute(text("PRAGMA table_info(offers)"))]
+        if offer_cols and "payment" not in offer_cols:
+            conn.execute(text("ALTER TABLE offers ADD COLUMN payment VARCHAR(32)"))
+
+
 def init_db() -> None:
     import app.models  # noqa: F401 — register metadata
 
     Base.metadata.create_all(bind=engine)
+    _ensure_sqlite_columns()

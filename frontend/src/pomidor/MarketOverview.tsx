@@ -1,13 +1,13 @@
 import { useMemo } from "react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { MOCK_SOURCE, yearlyVolume } from "./data/catalog";
+import { yearlyVolume } from "./data/catalog";
 import Fundamentals from "./Fundamentals";
 import HeroChart from "./HeroChart";
 import NewsPanel from "./NewsPanel";
+import ProductBrief from "./ProductBrief";
 import SparkCard from "./SparkCard";
 import Watchlist from "./Watchlist";
 import { formatPrice, signedPct } from "./lib/format";
-import { priceUnit } from "./lib/unit";
 import type { ChartPoint, Product } from "./types";
 
 type MarketOverviewProps = {
@@ -37,7 +37,6 @@ export default function MarketOverview({ products, product, live: _live, onSelec
   const basketPrev = basket.filter((point) => point.price > 0).at(-2)?.price ?? basketPrice;
   const basketChange = basketPrev ? Number((((basketPrice - basketPrev) / basketPrev) * 100).toFixed(1)) : 0;
   const topUp = products.reduce((best, item) => (item.change > best.change ? item : best), products[0]);
-  const topDown = products.reduce((best, item) => (item.change < best.change ? item : best), products[0]);
   const volumeBars = [...products]
     .sort((a, b) => yearlyVolume(b) - yearlyVolume(a))
     .slice(0, 6)
@@ -50,9 +49,6 @@ export default function MarketOverview({ products, product, live: _live, onSelec
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold text-ink">Bozor ko‘rinishi</h1>
-          <p className="text-[13px] text-muted">
-            {MOCK_SOURCE.label}. {MOCK_SOURCE.note}
-          </p>
         </div>
       </div>
 
@@ -65,30 +61,19 @@ export default function MarketOverview({ products, product, live: _live, onSelec
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <SparkCard
-          title="Bozor savati"
-          ticker="SAVAT"
-          price={`${formatPrice(basketPrice)} UZS/kg`}
-          change={basketChange}
-          data={basket}
-        />
-        <SparkCard
-          title={topUp?.name ?? "O‘sish"}
-          ticker="TOP+"
-          price={`${formatPrice(topUp?.price ?? 0)} ${topUp ? priceUnit(topUp.unit) : "UZS"}`}
-          change={topUp?.change ?? 0}
-          data={topUp?.chartData ?? []}
-          onClick={topUp ? () => onSelect(topUp.id) : undefined}
-        />
-        <SparkCard
-          title={topDown?.name ?? "Pasayish"}
-          ticker="TOP−"
-          price={`${formatPrice(topDown?.price ?? 0)} ${topDown ? priceUnit(topDown.unit) : "UZS"}`}
-          change={topDown?.change ?? 0}
-          data={topDown?.chartData ?? []}
-          onClick={topDown ? () => onSelect(topDown.id) : undefined}
-        />
+      <div className="grid items-stretch gap-4 lg:grid-cols-12">
+        <div className="lg:col-span-8">
+          <ProductBrief product={product} />
+        </div>
+        <div className="lg:col-span-4">
+          <SparkCard
+            title="Bozor savati"
+            ticker="O‘rtacha kg"
+            price={`${formatPrice(basketPrice)} so‘m / kg`}
+            change={basketChange}
+            data={basket}
+          />
+        </div>
       </div>
 
       <div className="grid items-start gap-4 lg:grid-cols-12">
@@ -124,9 +109,10 @@ export default function MarketOverview({ products, product, live: _live, onSelec
               Eng ko‘p o‘sish {signedPct(growth)}. Eng ko‘p hajm: {topVolume?.name ?? "—"}.
             </p>
           </article>
-          <Fundamentals product={product} onOpenProduct={onSelect} />
         </div>
       </div>
+
+      <Fundamentals product={product} products={products} />
     </div>
   );
 }

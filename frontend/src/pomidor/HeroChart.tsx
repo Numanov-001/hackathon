@@ -1,7 +1,7 @@
 import { useId, useMemo, useState } from "react";
-import { TrendingDown, TrendingUp } from "lucide-react";
+import { CircleHelp, TrendingDown, TrendingUp } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { MOCK_SOURCE } from "./data/catalog";
+import { chartBlurb } from "./data/briefs";
 import ProductMark from "./ProductMark";
 import { formatPrice, signedPct } from "./lib/format";
 import { tickerOf } from "./lib/ticker";
@@ -29,6 +29,8 @@ function monthLabel(value: string) {
 
 export default function HeroChart({ product }: { product: Product }) {
   const [range, setRange] = useState<(typeof RANGES)[number]["id"]>("1Y");
+  const [helpOpen, setHelpOpen] = useState(false);
+  const helpId = useId();
   const fillId = useId().replace(/:/g, "");
   const up = product.change >= 0;
   const color = up ? "#0E6B3C" : "#9B1C1C";
@@ -44,7 +46,22 @@ export default function HeroChart({ product }: { product: Product }) {
         <div className="flex items-center gap-3">
           <ProductMark name={product.name} image={product.image} size="md" />
           <div>
-            <h2 className="text-base font-semibold text-ink">{product.name}</h2>
+            <div className="flex items-center gap-1.5">
+              <h2 className="text-base font-semibold text-ink">{product.name}</h2>
+              <button
+                type="button"
+                aria-expanded={helpOpen}
+                aria-controls={helpId}
+                aria-label="Grafik nima ko‘rsatadi"
+                onClick={() => setHelpOpen((current) => !current)}
+                className={cn(
+                  "grid h-8 w-8 place-items-center rounded-[6px] text-muted outline-none hover:bg-subtle hover:text-ink focus-visible:ring-2 focus-visible:ring-focus",
+                  helpOpen && "bg-soft text-accent",
+                )}
+              >
+                <CircleHelp size={16} strokeWidth={1.8} aria-hidden="true" />
+              </button>
+            </div>
             <p className="text-[13px] text-muted">{tickerOf(product.id)} · {priceUnit(product.unit)}</p>
           </div>
         </div>
@@ -65,6 +82,11 @@ export default function HeroChart({ product }: { product: Product }) {
           ))}
         </div>
       </div>
+      {helpOpen && (
+        <p id={helpId} className="mb-4 rounded-[10px] bg-subtle px-3 py-2 text-sm text-muted">
+          {chartBlurb(product)}
+        </p>
+      )}
 
       <div className="mb-4">
         <p className="tabular text-[32px] font-semibold leading-none tracking-tight text-ink">
@@ -123,10 +145,6 @@ export default function HeroChart({ product }: { product: Product }) {
           </AreaChart>
         </ResponsiveContainer>
       </div>
-
-      <p className="mt-3 text-[13px] text-muted">
-        {MOCK_SOURCE.label}. {MOCK_SOURCE.note}
-      </p>
     </section>
   );
 }

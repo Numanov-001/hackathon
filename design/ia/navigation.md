@@ -3,11 +3,11 @@
 One level. The same words appear in the top bar, the section title, and the primary action.
 
 - **Bozor** — market overview: selected crop chart, top products, news. Open without an account.
-- **P2P** — buy and sell offers. These are intentions, not completed trades. Acting on an offer needs sign-in.
+- **P2P** — buy and sell ads, cheapest first. Each row shows amount, place, and phone. Posting an ad needs sign-in and a phone number.
 - **Mahsulotlar** — all tracked crops with last price and change.
 - **Kirish** — Gmail / Google. One account. No seller or buyer role.
 - **Profil** — name, phone, region. Email comes from Gmail.
-- **Obuna** — account plan.
+- **Obuna** — free account only. No paid plans.
 
 ### Guidelines
 
