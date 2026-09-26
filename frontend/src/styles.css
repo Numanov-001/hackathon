@@ -67,11 +67,16 @@ body {
 }
 
 @keyframes planTurn {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(-360deg); }
+}
+
+.plan-stage {
+  perspective: 1100px;
 }
 
 .plan-card.is-turning {
+  transform-origin: center;
   animation: planTurn 900ms cubic-bezier(0.22, 1, 0.36, 1) 1 both;
 }
 

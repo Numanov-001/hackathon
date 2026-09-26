@@ -140,7 +140,7 @@ export default function AccountPage({ mode, profile, onChange, onSave, onChooseP
           return (
             <div
               key={card.key}
-              className="h-full"
+              className="plan-stage h-full"
               onMouseEnter={() => {
                 if (spun.current.has(card.key)) return;
                 spun.current.add(card.key);
