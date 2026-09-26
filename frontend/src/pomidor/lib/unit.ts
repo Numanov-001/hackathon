@@ -30,6 +30,18 @@ export function formatPhone(raw: string) {
   return `+998 ${local.slice(0, 2)} ${local.slice(2, 5)} ${local.slice(5, 7)} ${local.slice(7)}`;
 }
 
+export function formatPhoneInput(raw: string) {
+  let digits = raw.replace(/\D/g, "");
+  if (digits.startsWith("998")) digits = digits.slice(3);
+  digits = digits.slice(0, 9);
+  let next = "+998";
+  if (digits.length) next += ` ${digits.slice(0, 2)}`;
+  if (digits.length > 2) next += ` ${digits.slice(2, 5)}`;
+  if (digits.length > 5) next += ` ${digits.slice(5, 7)}`;
+  if (digits.length > 7) next += ` ${digits.slice(7, 9)}`;
+  return next;
+}
+
 export function phoneHref(raw: string) {
   const digits = raw.replace(/\D/g, "");
   const full = digits.startsWith("998") ? digits : `998${digits}`;

@@ -17,6 +17,7 @@
   --color-focus: #146b43;
   --color-live: #8a4b08;
   --color-on-accent: #ffffff;
+  --color-scrim: rgba(22, 48, 40, 0.45);
   --shadow-overlay: 0 12px 32px rgba(22, 48, 40, 0.16);
 }
 
@@ -66,6 +67,20 @@ body {
   to { transform: scaleX(1); }
 }
 
+@keyframes planTurn {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(-360deg); }
+}
+
+.plan-stage {
+  perspective: 1100px;
+}
+
+.plan-card.is-turning {
+  transform-origin: center;
+  animation: planTurn 900ms cubic-bezier(0.22, 1, 0.36, 1) 1 both;
+}
+
 .enter {
   animation: riseIn 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: var(--enter, 0ms);
@@ -73,6 +88,14 @@ body {
 
 .enter-nav {
   animation: slideDown 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.menu-in {
+  animation: slideDown 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.menu-in-up {
+  animation: fadeIn 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .splash {
@@ -87,8 +110,11 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .enter,
   .enter-nav,
+  .menu-in,
+  .menu-in-up,
   .splash,
   .splash-bar,
+  .plan-card.is-turning,
   .animate-\[fadeIn_180ms_ease\] {
     animation: none !important;
   }
