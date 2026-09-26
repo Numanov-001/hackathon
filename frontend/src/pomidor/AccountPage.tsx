@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Check, Handshake, Leaf, Mail, MapPin, Phone, Save, Sprout, UserRound, Warehouse } from "lucide-react";
 import { REGIONS } from "./data/products";
 import { CUSTOM_PLAN, PLANS } from "./data/profile";
@@ -36,6 +36,8 @@ function PlantBed({ featured }: { featured?: boolean }) {
 
 export default function AccountPage({ mode, profile, onChange, onSave, onChoosePlan, onCustom }: AccountPageProps) {
   const [busy, setBusy] = useState<PlanId | null>(null);
+  const [turning, setTurning] = useState<string | null>(null);
+  const spun = useRef(new Set<string>());
 
   async function choose(plan: PlanId) {
     if (!onChoosePlan || plan === profile.plan) return;
@@ -136,12 +138,26 @@ export default function AccountPage({ mode, profile, onChange, onSave, onChooseP
         {cards.map((card) => {
           const Icon = card.Icon;
           return (
-            <div key={card.key} className="plan-stage h-full">
+            <div
+              key={card.key}
+              className="h-full"
+              onMouseEnter={() => {
+                if (spun.current.has(card.key)) return;
+                spun.current.add(card.key);
+                setTurning(card.key);
+              }}
+              onMouseLeave={() => {
+                spun.current.delete(card.key);
+                setTurning((current) => (current === card.key ? null : current));
+              }}
+            >
               <article
                 className={cn(
                   "plan-card relative flex h-full flex-col overflow-hidden rounded-[16px] border bg-soft p-6",
                   card.featured ? "border-accent" : "border-line",
+                  turning === card.key && "is-turning",
                 )}
+                onAnimationEnd={() => setTurning((current) => (current === card.key ? null : current))}
               >
                 <PlantBed featured={card.featured} />
                 <div className="relative z-10 flex h-full flex-col">
