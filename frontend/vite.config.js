@@ -1,7 +1,17 @@
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { answerChat, sanitizeMessages, sanitizeSnapshot } from "./server/siteChat.js";
+
+const frontendRoot = path.dirname(fileURLToPath(import.meta.url));
+const envFile = path.join(frontendRoot, ".env");
+const exampleFile = path.join(frontendRoot, ".env.example");
+if (!fs.existsSync(envFile) && fs.existsSync(exampleFile)) {
+  fs.copyFileSync(exampleFile, envFile);
+}
 
 function siteChatPlugin(apiKey) {
   return {
