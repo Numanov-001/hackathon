@@ -1,8 +1,6 @@
-export const SYSTEM_PROMPT = `Siz Pomidor yordamchisisiz. Odobli, qisqa, odamdek gapiring. Mavzudan chiqmang: faqat shu sayt (bozor, grafik, P2P, kirish, obuna).
+export const SYSTEM_PROMPT = `Siz Pomidor yordamchisisiz. Har doim odobli. Salomga FAQAT: "Assalomu alaykum. Nima xizmat?" — raqam, pomidor, trend YOZILMASIN.
 
-Salom/hi/assalom: avval "Assalomu alaykum", keyin 1 qisqa taklif. Tahlil to'kmasangiz.
-
-Savolga: 1–2 gap. Raqam bo'lsa aytib, oddiy tushuntiring. "Sotib ol" demang. Jonli birja emas — demo oylik o'rtacha. Boshqa mavzuni muloyim rad eting.`;
+Raqam/foiz/2027 ni faqat foydalanuvchi o'zi so'rasa ayt. 2027 qatori yo'q (demo 2026-sengacha). 1–2 gap. Mavzudan chiqma. Sotib ol dema.`;
 
 const MAX_TURNS = 12;
 const MAX_CHARS = 500;
@@ -146,30 +144,30 @@ function isGreeting(question) {
   return /^(salom+|assalomu?\s*alaykum|assalom|hi+|hello|hey|qalaysiz|qalay)\b/.test(q) && q.length < 48;
 }
 
+function askedAboutMarket(question) {
+  const q = String(question || "").trim().toLowerCase();
+  return /narx|foiz|%|osh|tush|trend|202[4-9]|grafik|qancha|necha|pomidor|kartoshka|piyoz|bodring|truba|un\b|yog|guruch|p2p|e['']lon|obuna|kirish|profil/.test(q);
+}
+
 export function localMarketReply(question, snap) {
   const q = String(question || "").trim().toLowerCase();
-  if (isGreeting(question)) {
-    return "Assalomu alaykum. Pomidor yordamchisi. Bozor narxi, grafik yoki P2P haqida qisqa so'rang.";
-  }
-  if (/rahmat|tashakkur|thanks|thank you/.test(q)) {
-    return "Arzimaydi. Yana savol bo'lsa, yozing.";
+  if (/rahmat|tashakkur|thanks|thank you/.test(q)) return "Arzimaydi. Yana savol bo'lsa, yozing.";
+  if (isGreeting(question) || !askedAboutMarket(question)) return "Assalomu alaykum. Nima xizmat?";
+  if (/2027/.test(q)) return "2027 uchun saytda qator yo'q. Demo 2026-sentyabrgacha. Shu davrni aytaymi?";
+  if (/ob[- ]?havo|dasturlash|siyosat|bitcoin|kripto|python|javascript|futbol/.test(q)) {
+    return "Bu sayt mavzusi emas. Nima xizmat — bozor, narx yoki P2P?";
   }
   const a = analyzeSnapshot(snap);
-  if (/ob[- ]?havo|dasturlash|siyosat|bitcoin|kripto|python|javascript|futbol/.test(q)) {
-    return "Bu mavzu saytdan tashqari. Bozor, narx yoki P2P haqida so'rang.";
-  }
   if (/p2p|e['']lon|sotib|sotish|escrow/.test(q) && !/narx|osh|tush|trend|pomidor|kartoshka/.test(q)) {
     return "P2P — sotib olish va sotish e'lonlari. Bu yopilgan savdo emas.";
   }
   if (/obuna|plus|pro|clerk|kirish|profil/.test(q) && !/narx|osh|tush/.test(q)) {
-    return "Kirish Clerk orqali. Keyin Obuna, Profil va shu yordamchi ochiladi.";
+    return "Kirish Clerk orqali. Keyin Obuna va Profil ochiladi.";
   }
-  if (!a) {
-    return "Chapdan tovar tanlang. Men shu saytdagi demo narxni qisqa aytaman.";
-  }
+  if (!a) return "Chapdan tovar tanlang, keyin narxini so'rang.";
   const lastWord =
     a.lastChange > 0.3 ? "oshgan" : a.lastChange < -0.3 ? "tushgan" : "deyarli o'zgarmagan";
-  return `${a.productName} hozir ${a.last} UZS/${a.unit}. Oxirgi oy ${signed(a.lastChange)} — ${lastWord}. Bu demo oylik o'rtacha, jonli birja emas.`;
+  return `${a.productName} hozir ${a.last} UZS/${a.unit}. Oxirgi oy ${signed(a.lastChange)} — ${lastWord}. Demo oylik o'rtacha, jonli birja emas.`;
 }
 
 export async function groqReply(apiKey, messages, snap) {
@@ -214,7 +212,7 @@ export async function groqReply(apiKey, messages, snap) {
 
 export async function answerChat(apiKey, messages, snap) {
   const last = messages.at(-1)?.content || "";
-  if (isGreeting(last) || /rahmat|tashakkur/.test(last.toLowerCase())) {
+  if (isGreeting(last) || !askedAboutMarket(last) || /rahmat|tashakkur/.test(last.toLowerCase())) {
     return localMarketReply(last, snap);
   }
   if (apiKey) {

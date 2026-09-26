@@ -1,13 +1,13 @@
 import { Headphones, Send, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
-import { isGreeting, localMarketReply } from "./lib/localReply";
+import { askedAboutMarket, isGreeting, localMarketReply } from "./lib/localReply";
 import type { MarketSnapshot } from "./lib/marketSnapshot";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
 const STARTER: ChatMessage = {
   role: "assistant",
-  content: "Assalomu alaykum. Bozor, narx yoki P2P haqida qisqa so'rang.",
+  content: "Assalomu alaykum. Nima xizmat?",
 };
 
 type SiteAssistantProps = {
@@ -54,7 +54,7 @@ export default function SiteAssistant({ snapshot }: SiteAssistantProps) {
     setBusy(true);
     setError("");
     const local = localMarketReply(content, snapshot);
-    if (isGreeting(content) || /rahmat|tashakkur/i.test(content)) {
+    if (isGreeting(content) || !askedAboutMarket(content) || /rahmat|tashakkur/i.test(content)) {
       setMessages([...next, { role: "assistant", content: local }]);
       setBusy(false);
       return;
