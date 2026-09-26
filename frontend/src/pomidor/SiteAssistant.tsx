@@ -1,14 +1,19 @@
 import { Headphones, Send, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
+import type { MarketSnapshot } from "./lib/marketSnapshot";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
 const STARTER: ChatMessage = {
   role: "assistant",
-  content: "Pomidor yordamchisi. Bozor, P2P e’lonlar, kirish yoki obuna haqida so‘rang.",
+  content: "Tanlangan tovar qatorini o‘qiyman: trend, mavsum, oxirgi oy. So‘rang — sayt tahliliga qarab aytaman.",
 };
 
-export default function SiteAssistant() {
+type SiteAssistantProps = {
+  snapshot: MarketSnapshot;
+};
+
+export default function SiteAssistant({ snapshot }: SiteAssistantProps) {
   const titleId = useId();
   const inputId = useId();
   const [open, setOpen] = useState(false);
@@ -39,6 +44,14 @@ export default function SiteAssistant() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  function failText(status: number, code?: string) {
+    if (status === 429) return "Ko‘p so‘rov. Bir daqiqadan so‘ng urinib ko‘ring.";
+    if (status === 503 || code === "no_key") {
+      return "Serverda Groq kaliti yo‘q. Vercel Environment Variables ga GROQ_API_KEY qo‘ying.";
+    }
+    return "Hozir model javob bermadi. Qayta urinib ko‘ring.";
+  }
+
   async function send() {
     const content = text.trim();
     if (!content || busy) return;
@@ -51,15 +64,14 @@ export default function SiteAssistant() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next.filter((item) => item !== STARTER) }),
+        body: JSON.stringify({
+          messages: next.filter((item) => item !== STARTER),
+          snapshot,
+        }),
       });
       const data = (await response.json()) as { reply?: string; error?: string };
       if (!response.ok || !data.reply) {
-        setError(
-          response.status === 429
-            ? "Ko‘p so‘rov. Bir daqiqadan so‘ng urinib ko‘ring."
-            : "Hozir javob berilmadi. Keyinroq urinib ko‘ring.",
-        );
+        setError(failText(response.status, data.error));
         return;
       }
       setMessages([...next, { role: "assistant", content: data.reply }]);
@@ -130,7 +142,7 @@ export default function SiteAssistant() {
                   void send();
                 }
               }}
-              placeholder="Sayt haqida savol…"
+              placeholder="Masalan: pomidor oshayaptimi?"
               className="min-h-11 flex-1 resize-none rounded-[6px] border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-accent"
             />
             <button

@@ -14,6 +14,7 @@ import Navbar from "./Navbar";
 import P2PBoard from "./P2PBoard";
 import P2PSidebar from "./P2PSidebar";
 import ProductTable from "./ProductTable";
+import { buildMarketSnapshot } from "./lib/marketSnapshot";
 import SiteAssistant from "./SiteAssistant";
 import Toast from "./Toast";
 import WelcomeSplash from "./WelcomeSplash";
@@ -237,7 +238,7 @@ export default function Dashboard({
           </button>
         ))}
       </nav>
-      {isSignedIn && <SiteAssistant />}
+      {isSignedIn && <SiteAssistant snapshot={buildMarketSnapshot(product, products)} />}
       <Toast message={toast} />
     </div>
   );

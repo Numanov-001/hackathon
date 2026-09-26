@@ -1,4 +1,4 @@
-import { groqReply, sanitizeMessages } from "../server/siteChat.js";
+import { answerChat, sanitizeMessages, sanitizeSnapshot } from "../server/siteChat.js";
 
 export const config = { runtime: "edge" };
 
@@ -23,11 +23,7 @@ export default async function handler(req: Request) {
   if (limited(ip)) {
     return Response.json({ error: "limit" }, { status: 429 });
   }
-  const key = process.env.GROQ_API_KEY;
-  if (!key) {
-    return Response.json({ error: "no_key" }, { status: 503 });
-  }
-  let body: { messages?: unknown };
+  let body: { messages?: unknown; snapshot?: unknown };
   try {
     body = await req.json();
   } catch {
@@ -37,11 +33,19 @@ export default async function handler(req: Request) {
   if (!messages.length || messages[messages.length - 1].role !== "user") {
     return Response.json({ error: "empty" }, { status: 400 });
   }
+  const snapshot = sanitizeSnapshot(body.snapshot);
+  const key = process.env.GROQ_API_KEY || "";
   try {
-    const reply = await groqReply(key, messages);
-    return Response.json({ reply });
-  } catch (err) {
-    const status = err && typeof err === "object" && "status" in err ? Number(err.status) : 0;
-    return Response.json({ error: "groq", status }, { status: 502 });
+    const reply = await answerChat(key, messages, snapshot);
+    if (!reply) {
+      return Response.json({ error: "empty_reply" }, { status: 502 });
+    }
+    return Response.json({ reply, source: key ? "groq" : "local" });
+  } catch {
+    const fallback = await answerChat("", messages, snapshot);
+    if (fallback) {
+      return Response.json({ reply: fallback, source: "local" });
+    }
+    return Response.json({ error: "groq" }, { status: 502 });
   }
 }

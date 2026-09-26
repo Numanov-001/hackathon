@@ -1,7 +1,7 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import { groqReply, sanitizeMessages } from "./server/siteChat.js";
+import { answerChat, sanitizeMessages, sanitizeSnapshot } from "./server/siteChat.js";
 
 function siteChatPlugin(apiKey) {
   return {
@@ -17,11 +17,6 @@ function siteChatPlugin(apiKey) {
         req.on("data", (chunk) => chunks.push(chunk));
         req.on("end", async () => {
           res.setHeader("Content-Type", "application/json");
-          if (!apiKey) {
-            res.statusCode = 503;
-            res.end(JSON.stringify({ error: "no_key" }));
-            return;
-          }
           try {
             const body = JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}");
             const messages = sanitizeMessages(body.messages);
@@ -30,11 +25,17 @@ function siteChatPlugin(apiKey) {
               res.end(JSON.stringify({ error: "empty" }));
               return;
             }
-            const reply = await groqReply(apiKey, messages);
+            const snapshot = sanitizeSnapshot(body.snapshot);
+            const reply = await answerChat(apiKey, messages, snapshot);
+            if (!reply) {
+              res.statusCode = 502;
+              res.end(JSON.stringify({ error: "empty_reply" }));
+              return;
+            }
             res.end(JSON.stringify({ reply }));
-          } catch (err) {
+          } catch {
             res.statusCode = 502;
-            res.end(JSON.stringify({ error: "groq", status: err.status || 0 }));
+            res.end(JSON.stringify({ error: "groq" }));
           }
         });
         req.on("error", next);
