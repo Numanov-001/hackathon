@@ -14,6 +14,7 @@ import Navbar from "./Navbar";
 import P2PBoard from "./P2PBoard";
 import P2PSidebar from "./P2PSidebar";
 import ProductTable from "./ProductTable";
+import SiteAssistant from "./SiteAssistant";
 import Toast from "./Toast";
 import WelcomeSplash from "./WelcomeSplash";
 import type { NavId, UserProfile } from "./types";
@@ -236,6 +237,7 @@ export default function Dashboard({
           </button>
         ))}
       </nav>
+      {isSignedIn && <SiteAssistant />}
       <Toast message={toast} />
     </div>
   );
