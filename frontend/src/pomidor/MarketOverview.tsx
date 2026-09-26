@@ -1,13 +1,11 @@
 import { useMemo } from "react";
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { yearlyVolume } from "./data/catalog";
 import Fundamentals from "./Fundamentals";
 import HeroChart from "./HeroChart";
 import NewsPanel from "./NewsPanel";
 import ProductBrief from "./ProductBrief";
 import SparkCard from "./SparkCard";
 import Watchlist from "./Watchlist";
-import { formatPrice, signedPct } from "./lib/format";
+import { formatPrice } from "./lib/format";
 import type { ChartPoint, Product } from "./types";
 
 type MarketOverviewProps = {
@@ -36,13 +34,6 @@ export default function MarketOverview({ products, product, live: _live, onSelec
   const basketPrice = basket.filter((point) => point.price > 0).at(-1)?.price ?? 0;
   const basketPrev = basket.filter((point) => point.price > 0).at(-2)?.price ?? basketPrice;
   const basketChange = basketPrev ? Number((((basketPrice - basketPrev) / basketPrev) * 100).toFixed(1)) : 0;
-  const topUp = products.reduce((best, item) => (item.change > best.change ? item : best), products[0]);
-  const volumeBars = [...products]
-    .sort((a, b) => yearlyVolume(b) - yearlyVolume(a))
-    .slice(0, 6)
-    .map((row) => ({ name: row.name, volume: Math.round(yearlyVolume(row) / 1000) }));
-  const topVolume = [...products].sort((a, b) => yearlyVolume(b) - yearlyVolume(a))[0];
-  const growth = topUp?.change ?? 0;
 
   return (
     <div className="grid gap-4">
@@ -76,43 +67,9 @@ export default function MarketOverview({ products, product, live: _live, onSelec
         </div>
       </div>
 
-      <div className="grid items-start gap-4 lg:grid-cols-12">
-        <div className="lg:col-span-7">
-          <NewsPanel onOpenProduct={onSelect} />
-        </div>
-        <div className="grid gap-4 lg:col-span-5">
-          <article className="rounded-[10px] border border-line bg-surface p-4">
-            <h2 className="text-base font-semibold text-ink">12 oy hajm</h2>
-            <p className="mb-3 text-[13px] text-muted">Hisobiy birlik, mingda. Taqqoslash uchun.</p>
-            <div className="h-44">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={volumeBars} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
-                  <XAxis dataKey="name" tick={{ fill: "#4E5A54", fontSize: 11 }} axisLine={false} tickLine={false} interval={0} />
-                  <YAxis hide />
-                  <Tooltip
-                    cursor={{ fill: "#F4F6F5" }}
-                    content={({ active, payload }) => {
-                      if (!active || !payload?.[0]) return null;
-                      return (
-                        <div className="rounded-[6px] border border-line bg-surface px-2.5 py-1.5 shadow-overlay">
-                          <p className="text-[13px] font-semibold text-ink">{payload[0].payload.name}</p>
-                          <p className="tabular text-[13px] text-muted">{formatPrice(Number(payload[0].value))} ming</p>
-                        </div>
-                      );
-                    }}
-                  />
-                  <Bar dataKey="volume" fill="#146B43" radius={[4, 4, 0, 0]} maxBarSize={28} isAnimationActive={false} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <p className="mt-2 text-[13px] text-muted">
-              Eng ko‘p o‘sish {signedPct(growth)}. Eng ko‘p hajm: {topVolume?.name ?? "—"}.
-            </p>
-          </article>
-        </div>
-      </div>
-
       <Fundamentals product={product} products={products} />
+
+      <NewsPanel onOpenProduct={onSelect} />
     </div>
   );
 }
