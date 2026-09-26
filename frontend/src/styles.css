@@ -66,6 +66,24 @@ body {
   to { transform: scaleX(1); }
 }
 
+@keyframes planTurn {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+}
+
+.plan-stage {
+  perspective: 1100px;
+}
+
+.plan-card {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.plan-card:hover {
+  animation: planTurn 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .enter {
   animation: riseIn 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: var(--enter, 0ms);
@@ -89,6 +107,7 @@ body {
   .enter-nav,
   .splash,
   .splash-bar,
+  .plan-card:hover,
   .animate-\[fadeIn_180ms_ease\] {
     animation: none !important;
   }
