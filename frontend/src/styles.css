@@ -27,11 +27,23 @@ body,
   min-height: 100%;
 }
 
+html {
+  overflow-x: clip;
+}
+
 body {
   margin: 0;
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   color: var(--color-ink);
   background: var(--color-canvas);
+}
+
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
 }
 
 :focus-visible {

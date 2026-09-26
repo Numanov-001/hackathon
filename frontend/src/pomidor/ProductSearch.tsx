@@ -8,12 +8,14 @@ import type { Product } from "./types";
 type ProductSearchProps = {
   products: Product[];
   onOpenProduct: (id: string) => void;
+  className?: string;
 };
 
-export default function ProductSearch({ products, onOpenProduct }: ProductSearchProps) {
+export default function ProductSearch({ products, onOpenProduct, className }: ProductSearchProps) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
+  const inputId = useId();
   const listId = useId();
   const matches = products.filter((item) => {
     const q = query.trim().toLowerCase();
@@ -37,11 +39,11 @@ export default function ProductSearch({ products, onOpenProduct }: ProductSearch
   }, []);
 
   return (
-    <div className="relative hidden min-w-[220px] flex-1 max-w-md md:block" ref={root}>
-      <label className="sr-only" htmlFor="product-search">Mahsulot qidiruvi</label>
+    <div className={cn("relative min-w-0 max-w-md flex-1", className)} ref={root}>
+      <label className="sr-only" htmlFor={inputId}>Mahsulot qidiruvi</label>
       <Search size={16} strokeWidth={1.8} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
       <input
-        id="product-search"
+        id={inputId}
         value={query}
         onChange={(event) => {
           setQuery(event.target.value);

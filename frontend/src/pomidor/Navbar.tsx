@@ -72,14 +72,14 @@ export default function Navbar({
   onNeedClerk,
 }: NavbarProps) {
   return (
-    <header className="enter-nav sticky top-0 z-40 h-16 border-b border-line bg-surface">
-      <div className="mx-auto flex h-full w-full max-w-[1440px] items-center gap-4 px-4 lg:px-6">
-        <button type="button" className="grid h-10 w-10 place-items-center rounded-[6px] text-ink lg:hidden" onClick={() => onMenu(!menuOpen)} aria-label="Menyu">
+    <header className="enter-nav sticky top-0 z-40 border-b border-line bg-surface">
+      <div className="mx-auto flex h-16 w-full max-w-[1440px] items-center gap-2 px-3 sm:gap-4 sm:px-4 lg:px-6">
+        <button type="button" className="grid h-11 w-11 shrink-0 place-items-center rounded-[6px] text-ink lg:hidden" onClick={() => onMenu(!menuOpen)} aria-label="Menyu">
           {menuOpen ? <X size={20} strokeWidth={1.8} /> : <Menu size={20} strokeWidth={1.8} />}
         </button>
-        <button type="button" className="flex items-center gap-2" onClick={() => onSection("bozor")} aria-label={BRAND_NAME}>
+        <button type="button" className="flex min-w-0 items-center gap-2" onClick={() => onSection("bozor")} aria-label={BRAND_NAME}>
           <Logo />
-          <span className="text-xl font-semibold tracking-tight text-ink">{BRAND_NAME}</span>
+          <span className="truncate text-base font-semibold tracking-tight text-ink sm:text-xl">{BRAND_NAME}</span>
         </button>
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Asosiy">
           {[...ITEMS, ...(isSignedIn ? ACCOUNT_ITEMS : [])].map((item) => {
@@ -102,8 +102,8 @@ export default function Navbar({
             );
           })}
         </nav>
-        <ProductSearch products={products} onOpenProduct={onOpenProduct} />
-        <div className="ml-auto flex items-center gap-3">
+        <ProductSearch products={products} onOpenProduct={onOpenProduct} className="hidden min-w-[220px] md:block" />
+        <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
           <div className="hidden h-8 w-px bg-line sm:block" />
           {isSignedIn && clerkEnabled ? (
             <UserButton />
@@ -111,13 +111,18 @@ export default function Navbar({
             <KirishButton
               clerkEnabled={clerkEnabled}
               onNeedClerk={onNeedClerk}
-              className="inline-flex min-h-10 items-center rounded-[6px] bg-accent px-4 text-sm font-semibold text-on-accent hover:bg-accent-hover"
+              className="inline-flex min-h-11 items-center rounded-[6px] bg-accent px-3 text-sm font-semibold text-on-accent hover:bg-accent-hover sm:px-4"
             />
           )}
         </div>
       </div>
       {menuOpen && (
-        <div className="border-t border-line bg-surface px-4 py-3 lg:hidden">
+        <div className="border-t border-line bg-surface px-3 py-3 lg:hidden">
+          <ProductSearch
+            products={products}
+            onOpenProduct={(id) => { onOpenProduct(id); onMenu(false); }}
+            className="mb-3 max-w-none md:hidden"
+          />
           <div className="grid gap-1">
             {[
               ...ITEMS,

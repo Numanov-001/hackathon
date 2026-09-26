@@ -95,16 +95,16 @@ export default function P2PBoard({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 flex-wrap items-center gap-3">
             <h2 className="text-lg font-semibold text-ink">P2P</h2>
-            <div className="flex rounded-[6px] bg-subtle p-1" role="group" aria-label="P2P tomoni">
-              <button type="button" onClick={() => onSide("buy")} className={cn("min-h-10 rounded-[6px] px-4 text-sm font-semibold transition-colors duration-150", side === "buy" ? "bg-surface text-ink ring-1 ring-line" : "text-muted")}>
+            <div className="grid w-full grid-cols-2 rounded-[6px] bg-subtle p-1 sm:flex sm:w-auto" role="group" aria-label="P2P tomoni">
+              <button type="button" onClick={() => onSide("buy")} className={cn("min-h-11 rounded-[6px] px-4 text-sm font-semibold transition-colors duration-150", side === "buy" ? "bg-surface text-ink ring-1 ring-line" : "text-muted")}>
                 Sotib olish
               </button>
-              <button type="button" onClick={() => onSide("sell")} className={cn("min-h-10 rounded-[6px] px-4 text-sm font-semibold transition-colors duration-150", side === "sell" ? "bg-surface text-ink ring-1 ring-line" : "text-muted")}>
+              <button type="button" onClick={() => onSide("sell")} className={cn("min-h-11 rounded-[6px] px-4 text-sm font-semibold transition-colors duration-150", side === "sell" ? "bg-surface text-ink ring-1 ring-line" : "text-muted")}>
                 Sotish
               </button>
             </div>
           </div>
-          <button type="button" onClick={onPost} className="inline-flex h-10 items-center rounded-[6px] bg-accent px-4 text-sm font-semibold text-on-accent hover:bg-accent-hover">
+          <button type="button" onClick={onPost} className="inline-flex h-11 w-full items-center justify-center rounded-[6px] bg-accent px-4 text-sm font-semibold text-on-accent hover:bg-accent-hover sm:w-auto">
             E’lon qo‘yish
           </button>
         </div>
@@ -124,7 +124,7 @@ export default function P2PBoard({
           />
         )}
 
-        <div className="relative z-20 mt-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
+        <div className="relative z-20 mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <div className="grid gap-1 text-[13px] font-medium text-muted">
             Mahsulot
             <Select

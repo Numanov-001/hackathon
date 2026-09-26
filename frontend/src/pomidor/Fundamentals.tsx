@@ -107,7 +107,7 @@ export default function Fundamentals({ product, products }: FundamentalsProps) {
 
   return (
     <section className="rounded-[10px] border border-line bg-surface p-4 sm:p-5" aria-labelledby="price-read">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:flex-wrap sm:items-end">
         <div className="flex min-w-0 items-start gap-3">
           <span
             className={cn(
@@ -128,8 +128,8 @@ export default function Fundamentals({ product, products }: FundamentalsProps) {
             <p className="mt-1 max-w-md text-sm text-ink">{read.hint}</p>
           </div>
         </div>
-        <p className="text-right">
-          <span className="tabular block text-[32px] font-semibold leading-[1.2] text-ink">{formatPrice(stats.last)}</span>
+        <p className="text-left sm:text-right">
+          <span className="tabular block text-[28px] font-semibold leading-[1.2] text-ink sm:text-[32px]">{formatPrice(stats.last)}</span>
           <span className="text-[13px] text-muted">so‘m / {UNIT_LABEL[unit]}</span>
           <span className={cn("mt-1 flex items-center justify-end gap-1 text-[13px] font-semibold", vsYear > 0 ? "text-bid" : vsYear < 0 ? "text-ask" : "text-ink")}>
             {vsYear > 0 ? <TrendingUp size={12} strokeWidth={2} aria-hidden="true" /> : vsYear < 0 ? <TrendingDown size={12} strokeWidth={2} aria-hidden="true" /> : null}
@@ -138,7 +138,7 @@ export default function Fundamentals({ product, products }: FundamentalsProps) {
         </p>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-3 xl:grid-cols-4">
+      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi
           icon={<Sprout size={16} strokeWidth={1.8} />}
           label="Eng arzon past narx"

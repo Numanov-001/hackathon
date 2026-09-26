@@ -19,7 +19,30 @@ export default function ProductTable({ products, onSelect }: ProductTableProps) 
         <h1 className="text-xl font-semibold text-ink">Mahsulotlar</h1>
         <p className="text-[13px] text-muted">24 oy oylik o‘rtacha. Qatorni bosing — grafik ochiladi.</p>
       </div>
-      <div className="overflow-x-auto">
+      <ul className="divide-y divide-line md:hidden">
+        {products.map((product) => {
+          const up = product.change >= 0;
+          return (
+            <li key={product.id}>
+              <button type="button" onClick={() => onSelect(product.id)} className="flex w-full items-center gap-3 px-4 py-3 text-left">
+                <ProductMark name={product.name} image={product.image} />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium text-ink">{product.name}</span>
+                  <span className="block text-[13px] text-muted">{CATEGORY_LABEL[product.category]}</span>
+                </span>
+                <span className="text-right">
+                  <span className="tabular block text-sm font-semibold text-ink">{formatPrice(product.price)}</span>
+                  <span className={`tabular inline-flex items-center gap-1 text-[13px] font-semibold ${up ? "text-ask" : "text-bid"}`}>
+                    {up ? <TrendingUp size={14} strokeWidth={1.8} aria-hidden="true" /> : <TrendingDown size={14} strokeWidth={1.8} aria-hidden="true" />}
+                    {signedPct(product.change)}
+                  </span>
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[720px] text-left">
           <thead className="bg-subtle text-[13px] text-muted">
             <tr>

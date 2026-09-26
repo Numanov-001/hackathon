@@ -131,7 +131,7 @@ export default function AccountPage({ mode, profile, onChange, onSave, onChooseP
   ];
 
   return (
-    <section className="relative mx-auto w-full max-w-[1200px] overflow-hidden rounded-[16px] bg-soft px-4 py-10 lg:px-8" aria-labelledby="obuna-title">
+    <section className="relative mx-auto w-full max-w-[1200px] overflow-hidden rounded-[16px] bg-soft px-3 py-8 sm:px-4 sm:py-10 lg:px-8" aria-labelledby="obuna-title">
       <BotanicLeaf className="pointer-events-none absolute left-[10%] top-20 h-8 w-6 -rotate-[40deg] text-accent/35" />
       <BotanicLeaf className="pointer-events-none absolute right-[11%] top-24 h-8 w-6 rotate-[38deg] text-accent/35" />
       <BotanicLeaf className="pointer-events-none absolute bottom-4 left-6 h-12 w-8 -rotate-[24deg] text-accent/20" />
@@ -142,7 +142,7 @@ export default function AccountPage({ mode, profile, onChange, onSave, onChooseP
           <Leaf size={14} strokeWidth={1.8} aria-hidden="true" />
           Tariflar
         </p>
-        <h2 id="obuna-title" className="mt-4 text-[32px] font-semibold leading-[1.2] text-ink">
+        <h2 id="obuna-title" className="mt-4 text-2xl font-semibold leading-[1.2] text-ink sm:text-[32px]">
           Siz uchun eng qulay tarif
         </h2>
         <p className="mt-3 text-sm leading-6 text-muted">
@@ -169,7 +169,7 @@ export default function AccountPage({ mode, profile, onChange, onSave, onChooseP
             >
               <article
                 className={cn(
-                  "plan-card relative flex h-full flex-col overflow-visible rounded-[16px] bg-surface p-6 shadow-overlay",
+                  "plan-card relative flex h-full flex-col overflow-visible rounded-[16px] bg-surface p-4 shadow-overlay sm:p-6",
                   card.featured ? "border-2 border-accent" : "border border-line",
                   turning === card.key && "is-turning",
                 )}
@@ -194,7 +194,7 @@ export default function AccountPage({ mode, profile, onChange, onSave, onChooseP
                   <h3 className="mt-5 text-xl font-semibold leading-[1.2] text-ink">{card.name}</h3>
                   <p className="mt-1 text-sm leading-6 text-muted">{card.blurb}</p>
                   <p className="mt-6 flex flex-wrap items-end gap-1.5 text-ink">
-                    <span className="tabular text-[32px] font-semibold leading-none">{card.price}</span>
+                    <span className="tabular text-[28px] font-semibold leading-none sm:text-[32px]">{card.price}</span>
                     {card.period ? <span className="pb-0.5 text-sm text-muted">{card.period}</span> : null}
                   </p>
                   <button

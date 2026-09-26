@@ -211,8 +211,8 @@ export default function HeroChart({ product, plan, getToken, isSignedIn, onNeedA
   }
 
   return (
-    <section className="flex h-full min-h-[420px] flex-col rounded-[10px] border border-line bg-surface p-4 sm:p-5">
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+    <section className="flex h-full min-h-0 flex-col rounded-[10px] border border-line bg-surface p-4 sm:min-h-[420px] sm:p-5">
+      <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:flex-wrap">
         <div className="flex items-center gap-3">
           <ProductMark name={product.name} image={product.image} size="md" />
           <div>
@@ -235,8 +235,8 @@ export default function HeroChart({ product, plan, getToken, isSignedIn, onNeedA
             <p className="text-[13px] text-muted">{tickerOf(product.id)} · {priceUnit(product.unit)}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex rounded-[6px] bg-subtle p-1" role="group" aria-label="Vaqt oralig'i">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+          <div className="flex w-full rounded-[6px] bg-subtle p-1 sm:w-auto" role="group" aria-label="Vaqt oralig'i">
             {RANGES.map((item) => (
               <button
                 key={item.id}
@@ -244,7 +244,7 @@ export default function HeroChart({ product, plan, getToken, isSignedIn, onNeedA
                 onClick={() => { setRange(item.id); if (forecastOpen) closeForecast(); }}
                 aria-pressed={range === item.id}
                 className={cn(
-                  "cursor-pointer min-h-8 rounded-[6px] px-3 text-[13px] font-semibold transition-colors",
+                  "min-h-10 flex-1 cursor-pointer rounded-[6px] px-3 text-[13px] font-semibold transition-colors sm:flex-none",
                   range === item.id ? "bg-surface text-ink ring-1 ring-line shadow-xs" : "text-muted hover:text-ink",
                 )}
               >
@@ -253,7 +253,6 @@ export default function HeroChart({ product, plan, getToken, isSignedIn, onNeedA
             ))}
           </div>
 
-          {/* Prognoz button */}
           <div className="relative" ref={horizonRef}>
             <button
               type="button"
@@ -266,11 +265,11 @@ export default function HeroChart({ product, plan, getToken, isSignedIn, onNeedA
               }}
               disabled={loading}
               className={cn(
-                "cursor-pointer flex items-center gap-1.5 rounded-[6px] px-3.5 py-1.5 text-[13px] font-semibold transition-all duration-200",
+                "flex min-h-10 w-full cursor-pointer items-center justify-center gap-1.5 rounded-[6px] px-3.5 py-1.5 text-[13px] font-semibold transition-all duration-200 sm:w-auto",
                 forecastOpen
                   ? "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200 dark:bg-indigo-950 dark:text-indigo-300 dark:ring-indigo-800"
                   : "bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 text-white shadow-xs hover:shadow-md hover:brightness-105 active:scale-95",
-                loading && "animate-pulse opacity-70 cursor-wait",
+                loading && "animate-pulse cursor-wait opacity-70",
                 !paid && isSignedIn && "opacity-60",
               )}
             >
@@ -313,7 +312,7 @@ export default function HeroChart({ product, plan, getToken, isSignedIn, onNeedA
       )}
 
       <div className="mb-3">
-        <p className="tabular text-[32px] font-semibold leading-none tracking-tight text-ink">
+        <p className="tabular text-[28px] font-semibold leading-none tracking-tight text-ink sm:text-[32px]">
           {formatPrice(product.price)}
           <span className="ml-2 text-base font-medium text-muted">{priceUnit(product.unit)}</span>
         </p>
@@ -324,7 +323,6 @@ export default function HeroChart({ product, plan, getToken, isSignedIn, onNeedA
         </p>
       </div>
 
-      {/* Visual Chart Legend when forecast is active */}
       {forecastOpen && (
         <div className="mb-2.5 flex flex-wrap items-center gap-4 text-[12px] text-muted">
           <div className="flex items-center gap-1.5">
@@ -345,7 +343,7 @@ export default function HeroChart({ product, plan, getToken, isSignedIn, onNeedA
         </div>
       )}
 
-      <div className="h-[280px] w-full lg:h-[320px]">
+      <div className="h-[220px] w-full sm:h-[280px] lg:h-[320px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={mergedData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <defs>
@@ -366,10 +364,10 @@ export default function HeroChart({ product, plan, getToken, isSignedIn, onNeedA
             <XAxis dataKey="date" tickFormatter={monthTick} tick={{ fill: "#4E5A54", fontSize: 12 }} axisLine={false} tickLine={false} minTickGap={28} />
             <YAxis
               tickFormatter={(value) => formatPrice(Number(value))}
-              tick={{ fill: "#4E5A54", fontSize: 12 }}
+              tick={{ fill: "#4E5A54", fontSize: 11 }}
               axisLine={false}
               tickLine={false}
-              width={72}
+              width={56}
               domain={[(min: number) => Math.floor(min * 0.94), (max: number) => Math.ceil(max * 1.04)]}
             />
             <Tooltip

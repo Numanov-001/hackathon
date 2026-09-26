@@ -30,7 +30,7 @@ export default function Watchlist({ products, selectedId, onSelect, onAll }: Wat
   );
 
   return (
-    <section className="flex h-full min-h-[420px] flex-col rounded-[10px] border border-line bg-surface">
+    <section className="flex h-full max-h-[420px] min-h-0 flex-col rounded-[10px] border border-line bg-surface lg:max-h-none lg:min-h-[420px]">
       <div className="flex items-center justify-between border-b border-line px-4 py-3">
         <h2 className="text-base font-semibold text-ink">Asosiy tovarlar</h2>
         <button type="button" onClick={onAll} className="inline-flex min-h-8 items-center gap-0.5 text-[13px] font-semibold text-accent hover:underline">

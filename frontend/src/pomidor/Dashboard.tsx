@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeftRight, CreditCard, Package, Store } from "lucide-react";
 import AccountPage from "./AccountPage";
 import { DEFAULT_PREFS, loadPrefs, savePrefs, type AccountPrefs } from "./data/profile";
 import { type P2POffer, type P2PSide } from "./data/p2p";
@@ -222,7 +223,7 @@ export default function Dashboard({
         onOpenProduct={openProduct}
         onNeedClerk={askClerk}
       />
-      <main id="main" className="mx-auto w-full max-w-[1440px] px-4 py-6 pb-24 lg:px-6 lg:pb-8">
+      <main id="main" className="mx-auto w-full max-w-[1440px] px-3 py-4 pb-28 sm:px-4 sm:py-6 lg:px-6 lg:pb-8">
         {section === "bozor" && (
           <MarketOverview
             products={products}
@@ -286,18 +287,20 @@ export default function Dashboard({
           />
         )}
       </main>
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-line bg-surface lg:hidden" aria-label="Pastki menyu">
-        {[
-          ["bozor", "Bozor"],
-          ["p2p", "P2P"],
-          ["mahsulotlar", "Mahsulotlar"],
-        ].map(([id, label]) => (
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden" aria-label="Pastki menyu">
+        {([
+          ["bozor", "Bozor", Store],
+          ["p2p", "P2P", ArrowLeftRight],
+          ["mahsulotlar", "Mahsulotlar", Package],
+          ["obuna", "Obuna", CreditCard],
+        ] as const).map(([id, label, Icon]) => (
           <button
             key={id}
             type="button"
-            onClick={() => setSection(id as NavId)}
-            className={`min-h-12 py-3 text-xs font-semibold ${section === id ? "text-accent" : "text-muted"}`}
+            onClick={() => goSection(id)}
+            className={`inline-flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold ${section === id ? "text-accent" : "text-muted"}`}
           >
+            <Icon size={18} strokeWidth={1.8} aria-hidden="true" />
             {label}
           </button>
         ))}
