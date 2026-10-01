@@ -9,10 +9,14 @@ const UNIT_PHRASE: Record<ProductUnit, string> = {
 const CATEGORY_BLURB: Record<ProductCategory, string> = {
   sabzavot:
     "Chiziq — oylik o‘rtacha narx. Dehqon bozori kabi: yozda arzon, qishda issiqxona tufayli qimmat.",
+  meva:
+    "Chiziq — oylik o‘rtacha. Meva uchun rasmiy SIAT 1308 qatori bo‘lsa, narx shu yerda chiqadi.",
+  don:
+    "Chiziq — don mahsulotlari uchun oylik o‘rtacha. Un qopda, guruch kilogrammda.",
   truba:
     "Chiziq — 1 metr uchun oylik o‘rtacha. Qurilish ketganda ko‘tariladi. Optom hisob metrda.",
   optom:
-    "Chiziq — optom oylik o‘rtacha. Ombor aylanmasi: un qopda, yog‘ va guruch kilogrammda.",
+    "Chiziq — optom oylik o‘rtacha. Ombor aylanmasi: un qopda, yog‘ kilogrammda.",
 };
 
 export function unitPhrase(unit: ProductUnit) {

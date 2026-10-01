@@ -13,16 +13,19 @@ type WatchlistProps = {
   selectedId: string;
   onSelect: (id: string) => void;
   onAll: () => void;
+  loading?: boolean;
 };
 
 const FILTERS: Array<{ id: "all" | ProductCategory; label: string }> = [
   { id: "all", label: "Barchasi" },
   { id: "sabzavot", label: CATEGORY_LABEL.sabzavot },
+  { id: "meva", label: CATEGORY_LABEL.meva },
+  { id: "don", label: CATEGORY_LABEL.don },
   { id: "truba", label: CATEGORY_LABEL.truba },
   { id: "optom", label: CATEGORY_LABEL.optom },
 ];
 
-export default function Watchlist({ products, selectedId, onSelect, onAll }: WatchlistProps) {
+export default function Watchlist({ products, selectedId, onSelect, onAll, loading }: WatchlistProps) {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["id"]>("all");
   const visible = useMemo(
     () => (filter === "all" ? products : products.filter((item) => item.category === filter)),
@@ -73,12 +76,25 @@ export default function Watchlist({ products, selectedId, onSelect, onAll }: Wat
                 <ProductMark name={product.name} image={product.image} />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium text-ink">{product.name}</span>
-                  <span className="block text-[13px] text-muted">{tickerOf(product.id)} · {priceUnit(product.unit)}</span>
+                  <span className="block text-[13px] text-muted">
+                    {tickerOf(product.id)} · {priceUnit(product.unit)}{product.month ? ` · ${product.month}` : ""}
+                  </span>
                 </span>
-                <span className="tabular text-sm font-semibold text-ink">{formatPrice(product.price)}</span>
-                <span className={cn("tabular inline-flex min-w-[72px] items-center justify-end gap-0.5 text-[13px] font-semibold", up ? "text-ask" : "text-bid")}>
-                  {up ? <TrendingUp size={12} strokeWidth={2} aria-hidden="true" /> : <TrendingDown size={12} strokeWidth={2} aria-hidden="true" />}
-                  {signedPct(product.change)}
+                <span className="text-right">
+                  <span className="tabular block text-sm font-semibold text-ink">
+                    {product.price > 0 ? formatPrice(product.price) : loading ? "…" : "—"}
+                  </span>
+                  {product.previousPrice ? (
+                    <span className="tabular block text-[11px] text-muted">{formatPrice(product.previousPrice)}</span>
+                  ) : null}
+                </span>
+                <span className={cn("tabular inline-flex min-w-[72px] items-center justify-end gap-0.5 text-[13px] font-semibold", product.price > 0 ? (up ? "text-ask" : "text-bid") : "text-muted")}>
+                  {product.price > 0 ? (
+                    <>
+                      {up ? <TrendingUp size={12} strokeWidth={2} aria-hidden="true" /> : <TrendingDown size={12} strokeWidth={2} aria-hidden="true" />}
+                      {signedPct(product.changePercent ?? product.change)}
+                    </>
+                  ) : "—"}
                 </span>
               </button>
             </li>

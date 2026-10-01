@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getJson, postJson } from "../../api/client";
-import { buildOffers, type P2POffer } from "../data/p2p";
+import type { P2POffer } from "../data/p2p";
 import type { Product } from "../types";
 
 export type DeskOfferDraft = {
@@ -67,6 +67,5 @@ export function useDeskOffers(
     await load();
   }
 
-  const visible = live && offers.length ? offers : products.length ? buildOffers(products) : [];
-  return { offers: visible, live, publish };
+  return { offers, live, publish };
 }

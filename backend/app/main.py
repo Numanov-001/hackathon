@@ -4,10 +4,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import chat, desk, forecast, market, offers, products, recommendations, regions, search, users, websocket
+from app.api import admin, alerts, chat, desk, forecast, market, market_prices, offers, products, recommendations, regions, search, siat, users, websocket
 from app.core.config import get_settings
 from app.core.database import SessionLocal, init_db
 from app.services.desk_catalog import seed_desk
+from app.services.siat_sync import sync_siat_1308
 
 logging.basicConfig(level=logging.INFO)
 settings = get_settings()
@@ -20,6 +21,7 @@ async def lifespan(_app: FastAPI):
     try:
         seed_desk(db)
         db.commit()
+        sync_siat_1308(db, force=False)
     finally:
         db.close()
     yield
@@ -41,6 +43,9 @@ app.include_router(regions.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 app.include_router(offers.router, prefix="/api")
 app.include_router(market.router, prefix="/api")
+app.include_router(market_prices.router, prefix="/api")
+app.include_router(alerts.router, prefix="/api")
+app.include_router(siat.router, prefix="/api")
 app.include_router(recommendations.router, prefix="/api")
 app.include_router(search.router, prefix="/api")
 app.include_router(forecast.router, prefix="/api")

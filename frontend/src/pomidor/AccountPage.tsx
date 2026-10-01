@@ -18,9 +18,11 @@ type AccountPageProps = {
 const field = "h-12 rounded-[6px] border border-line bg-surface px-3 text-sm outline-none focus:border-accent";
 
 const PLAN_UI: Record<PlanId, { blurb: string; Icon: typeof Leaf; featured?: boolean; cta: string }> = {
-  free: { blurb: "Bozorni ko'ring, P2P ni o'qing.", Icon: Leaf, cta: "Obunaga o'tish" },
-  starter: { blurb: "Sotuvchi va xaridor uchun.", Icon: Sprout, featured: true, cta: "Starter olish" },
-  business: { blurb: "Jamoa va ko'proq e'lon.", Icon: Building2, cta: "Business olish" },
+  free: { blurb: "Narx va asosiy P2P.", Icon: Leaf, cta: "FREE" },
+  starter: { blurb: "Birinchi oy bepul. Kartasiz ochiladi.", Icon: Sprout, featured: true, cta: "PRO ni ochish" },
+  business: { blurb: "Jamoa va API.", Icon: Building2, cta: "BUSINESS so‘rash" },
+  premium_monthly: { blurb: "Prognoz va tahlil.", Icon: Sprout, cta: "PRO so‘rash" },
+  premium_yearly: { blurb: "Yillik PRO.", Icon: Building2, cta: "Yillik so‘rash" },
 };
 
 function BotanicLeaf({ className }: { className?: string }) {
@@ -61,7 +63,8 @@ export default function AccountPage({ mode, profile, onChange, onSave, onChooseP
     return (
       <section className="mx-auto w-full max-w-3xl rounded-[10px] border border-line bg-surface p-6">
         <h2 className="text-xl font-semibold text-ink">Profil</h2>
-        <p className="mt-1 text-sm text-muted">Ism va email Clerk hisobidan. Rol yo‘q.</p>
+        <p className="mt-1 text-sm text-muted">Ism va email Clerk hisobidan.</p>
+        <p className="mt-2 text-sm text-muted">Obuna: {profile.premium ? "PRO" : "FREE"} · Rol: {profile.role === "admin" ? "ADMIN" : "USER"}{profile.subscriptionExpiry ? ` · Tugash: ${profile.subscriptionExpiry.slice(0, 10)}` : ""}</p>
         <div className="mt-6 grid gap-4">
           <label className="grid gap-1.5 text-sm font-medium text-ink">
             <span className="inline-flex items-center gap-1.5"><UserRound size={14} strokeWidth={1.8} /> To‘liq ism</span>
@@ -85,6 +88,16 @@ export default function AccountPage({ mode, profile, onChange, onSave, onChooseP
               options={REGIONS.map((item) => ({ value: item, label: item }))}
             />
           </div>
+        </div>
+        <div className="mt-6 grid gap-3 text-sm">
+          <p className="font-medium text-ink">Mening P2P e’lonlarim</p>
+          <p className="text-muted">E’lonlaringiz P2P bo‘limida, tizim hisobiga bog‘langan holda ko‘rinadi.</p>
+          <p className="font-medium text-ink">Mening so‘rovlarim</p>
+          <p className="text-muted">Xarid so‘rovlari P2P «Sotib olaman» ro‘yxatida.</p>
+          <p className="font-medium text-ink">Mening alertlarim</p>
+          <p className="text-muted">Narx alertlari Bozor sahifasida saqlanadi (qurilmada).</p>
+          <p className="font-medium text-ink">Saqlangan mahsulotlar</p>
+          <p className="text-muted">Kuzatuv ro‘yxati Bozor sahifasidagi watchlist orqali.</p>
         </div>
         <button type="button" onClick={onSave} className="mt-6 inline-flex h-12 items-center gap-2 rounded-[6px] bg-accent px-5 text-sm font-semibold text-on-accent hover:bg-accent-hover">
           <Save size={16} strokeWidth={1.8} />
@@ -146,7 +159,9 @@ export default function AccountPage({ mode, profile, onChange, onSave, onChooseP
           Siz uchun eng qulay tarif
         </h2>
         <p className="mt-3 text-sm leading-6 text-muted">
-          Platformamizdan foydalanish uchun obuna rejalari. Har bir reja o‘z imkoniyatlari bilan sizning biznesingiz rivojlanishiga yordam beradi.
+          PRO 1 oy bepul, karta so‘ralmaydi. Kirgan zahoti ochiladi.
+          {profile.promoUntil ? ` Aksiya: ${profile.promoUntil.slice(0, 10)} gacha.` : ""}
+          {profile.trial && profile.subscriptionExpiry ? ` Sizning PRO ${profile.subscriptionExpiry.slice(0, 10)} gacha.` : ""}
         </p>
       </header>
 

@@ -2,6 +2,7 @@ const TICKERS: Record<string, string> = {
   pomidor: "POMIDOR",
   kartoshka: "KARTOSHKA",
   piyoz: "PIYOZ",
+  sabzi: "SABZI",
   bodring: "BODRING",
   "pe-truba": "PE-T",
   "metall-truba": "METAL-T",

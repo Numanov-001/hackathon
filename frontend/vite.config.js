@@ -5,12 +5,29 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { answerChat, sanitizeMessages, sanitizeSnapshot } from "./server/siteChat.js";
+import { writeSiat1308 } from "./server/siatProxy.js";
 
 const frontendRoot = path.dirname(fileURLToPath(import.meta.url));
 const envFile = path.join(frontendRoot, ".env");
 const exampleFile = path.join(frontendRoot, ".env.example");
 if (!fs.existsSync(envFile) && fs.existsSync(exampleFile)) {
   fs.copyFileSync(exampleFile, envFile);
+}
+
+function siatPlugin() {
+  return {
+    name: "siat-proxy",
+    configureServer(server) {
+      server.middlewares.use("/api/siat", (req, res, next) => {
+        if (req.method !== "GET") {
+          res.statusCode = 405;
+          res.end();
+          return;
+        }
+        writeSiat1308(res).catch(next);
+      });
+    },
+  };
 }
 
 function siteChatPlugin(apiKey) {
@@ -57,7 +74,7 @@ function siteChatPlugin(apiKey) {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   return {
-    plugins: [react(), tailwindcss(), siteChatPlugin(env.GROQ_API_KEY)],
+    plugins: [react(), tailwindcss(), siatPlugin(), siteChatPlugin(env.GROQ_API_KEY)],
     server: {
       host: true,
       port: 5173,
@@ -74,7 +91,7 @@ export default defineConfig(({ mode }) => {
         "/api": {
           target: "http://127.0.0.1:8000",
           bypass(req) {
-            if (req.url?.startsWith("/api/chat")) return req.url;
+            if (req.url?.startsWith("/api/chat") || req.url?.startsWith("/api/siat")) return req.url;
           },
         },
         "/ws": {

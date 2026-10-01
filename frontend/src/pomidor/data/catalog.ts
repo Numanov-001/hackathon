@@ -2,6 +2,8 @@ import type { ChartPoint, Product, ProductCategory, ProductUnit } from "../types
 
 export const CATEGORY_LABEL: Record<ProductCategory, string> = {
   sabzavot: "Sabzavot",
+  meva: "Meva",
+  don: "Don mahsulotlari",
   truba: "Truba",
   optom: "Optom",
 };
@@ -125,7 +127,7 @@ const SPECS: Spec[] = [
   {
     id: "guruch",
     name: "Guruch",
-    category: "optom",
+    category: "don",
     unit: "kg",
     base: 14500,
     seasonal: 1100,
@@ -179,7 +181,11 @@ export function buildCatalog(): Product[] {
       change,
       chartData,
     };
-  });
+  }).map((product) =>
+    product.id === "pomidor" || product.id === "kartoshka" || product.id === "piyoz" || product.id === "sabzi"
+      ? { ...product, price: 0, previousPrice: 0, change: 0, changePercent: 0, month: "", chartData: [] }
+      : product,
+  );
 }
 
 export function yearlyVolume(product: Product) {

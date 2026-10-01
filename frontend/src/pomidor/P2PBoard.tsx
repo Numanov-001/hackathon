@@ -1,5 +1,9 @@
+import { useMemo } from "react";
+import SmartMatch from "./SmartMatch";
+import LogisticsPanel from "./LogisticsPanel";
 import { PAYMENTS, REGIONS, type P2POffer, type P2PSide } from "./data/p2p";
 import P2PPost from "./P2PPost";
+import { matchOffers } from "./lib/match";
 import { formatPrice } from "./lib/format";
 import { formatLot, formatPhone, formatPosted, phoneHref, priceUnit } from "./lib/unit";
 import { cn } from "./lib/cn";
@@ -89,7 +93,9 @@ export default function P2PBoard({
   onUnlock,
   onPublish,
 }: P2PBoardProps) {
+  const matches = useMemo(() => matchOffers(offers), [offers]);
   return (
+    <>
     <section className="w-full rounded-[10px] border border-line bg-surface">
       <div className="sticky top-16 z-10 border-b border-line bg-surface px-4 py-4 sm:px-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -97,10 +103,10 @@ export default function P2PBoard({
             <h2 className="text-lg font-semibold text-ink">P2P</h2>
             <div className="grid w-full grid-cols-2 rounded-[6px] bg-subtle p-1 sm:flex sm:w-auto" role="group" aria-label="P2P tomoni">
               <button type="button" onClick={() => onSide("buy")} className={cn("min-h-11 rounded-[6px] px-4 text-sm font-semibold transition-colors duration-150", side === "buy" ? "bg-surface text-ink ring-1 ring-line" : "text-muted")}>
-                Sotib olish
+                Sotib olaman
               </button>
               <button type="button" onClick={() => onSide("sell")} className={cn("min-h-11 rounded-[6px] px-4 text-sm font-semibold transition-colors duration-150", side === "sell" ? "bg-surface text-ink ring-1 ring-line" : "text-muted")}>
-                Sotish
+                Sotaman
               </button>
             </div>
           </div>
@@ -110,7 +116,7 @@ export default function P2PBoard({
         </div>
         <p className="mt-2 text-[13px] text-muted">
           {side === "buy" ? "Sotuvchilar, arzonidan qimmatiga." : "Xaridorlar, arzonidan qimmatiga."}{" "}
-          {contacts ? "Telefon orqali bog‘lanasiz." : "Telefon Starter tarifida ochiladi."}
+          {contacts ? "Telefon orqali bog‘lanasiz." : "Telefon Premium obunada ochiladi."}
         </p>
 
         {postOpen && (
@@ -181,7 +187,7 @@ export default function P2PBoard({
               <th className="py-3 pr-3 font-medium">Narx</th>
               <th className="py-3 pr-3 font-medium">Miqdor</th>
               <th className="py-3 pr-3 font-medium">Hudud</th>
-              <th className="py-3 font-medium">Telefon</th>
+                  <th className="py-3 font-medium">Amal</th>
             </tr>
           </thead>
           <tbody>
@@ -201,6 +207,9 @@ export default function P2PBoard({
                   <td className="py-3 pr-3 text-ink">{offer.region}</td>
                   <td className="py-3">
                     <PhoneCell phone={offer.phone} contacts={contacts} onUnlock={onUnlock} className="mt-2" />
+                    <button type="button" className="ml-3 text-[13px] font-semibold text-accent">
+                      {offer.side === "sell" ? "Taklifni ko'rish" : "Talabni ko'rish"}
+                    </button>
                   </td>
                 </tr>
               );
@@ -234,11 +243,19 @@ export default function P2PBoard({
                 </div>
               </dl>
               <PhoneCell phone={offer.phone} contacts={contacts} onUnlock={onUnlock} />
+              <button type="button" className="text-[13px] font-semibold text-accent">
+                {offer.side === "sell" ? "Taklifni ko'rish" : "Talabni ko'rish"}
+              </button>
             </article>
           );
         })}
       </div>
       {offers.length === 0 && <p className="px-4 py-8 text-center text-sm text-muted sm:px-5">Mos e’lon topilmadi. Filtrlarni kengaytiring.</p>}
     </section>
+      <div className="mt-4 grid gap-4">
+        <SmartMatch rows={matches} contacts={contacts} onUnlock={onUnlock} onOpenP2P={() => {}} />
+        <LogisticsPanel onOpenP2P={() => {}} />
+      </div>
+    </>
   );
 }

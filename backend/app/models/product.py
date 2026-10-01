@@ -19,6 +19,8 @@ class Product(Base):
     slug: Mapped[str | None] = mapped_column(String(64), unique=True, index=True, nullable=True)
     category: Mapped[str] = mapped_column(String(128))
     unit: Mapped[str] = mapped_column(String(32), default="kg")
+    enabled: Mapped[bool] = mapped_column(default=True)
+    emoji: Mapped[str] = mapped_column(String(8), default="")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

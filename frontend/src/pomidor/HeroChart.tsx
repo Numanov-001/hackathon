@@ -33,6 +33,7 @@ const RANGES = [
   { id: "6M", months: 6 },
   { id: "1Y", months: 12 },
   { id: "2Y", months: 24 },
+  { id: "ALL", months: 9999 },
 ] as const;
 
 const HORIZONS: { id: ForecastHorizon; label: string }[] = [
@@ -105,17 +106,19 @@ type HeroChartProps = {
   isSignedIn: boolean;
   onNeedAuth: () => void;
   onNeedPlan: () => void;
+  year?: number;
 };
 
 type MergedPoint = {
   date: string;
   price?: number;
+  change?: number;
   forecast?: number;
   forecastLow?: number;
   forecastHigh?: number;
 };
 
-export default function HeroChart({ product, plan, getToken, isSignedIn, onNeedAuth, onNeedPlan }: HeroChartProps) {
+export default function HeroChart({ product, plan, getToken, isSignedIn, onNeedAuth, onNeedPlan, year }: HeroChartProps) {
   const [range, setRange] = useState<(typeof RANGES)[number]["id"]>("1Y");
   const [helpOpen, setHelpOpen] = useState(false);
   const [forecastOpen, setForecastOpen] = useState(false);
@@ -132,20 +135,28 @@ export default function HeroChart({ product, plan, getToken, isSignedIn, onNeedA
   const up = product.change >= 0;
   const color = up ? "#0E6B3C" : "#9B1C1C";
   const forecastColor = "#4F46E5";
-  const paid = plan === "starter" || plan === "business";
+  const paid = plan === "starter" || plan === "business" || plan === "premium_monthly" || plan === "premium_yearly";
 
   const horizonRef = useRef<HTMLDivElement>(null);
 
   const data = useMemo(() => {
     const live = product.chartData.filter((point) => point.price > 0);
+    const byYear = year
+      ? live.filter((point) => (point.month || point.date).startsWith(String(year)))
+      : live;
+    if (year) return byYear;
     const months = RANGES.find((item) => item.id === range)?.months ?? 12;
-    return live.slice(-months);
-  }, [product.chartData, range]);
+    return byYear.slice(-months);
+  }, [product.chartData, range, year]);
 
   // Merge historical + prediction data for chart
   const mergedData = useMemo((): MergedPoint[] => {
     if (!forecastOpen || !prediction?.predicted_points.length) {
-      return data.map((p) => ({ date: p.date, price: p.price }));
+      return data.map((p, index) => {
+        const prev = data[index - 1]?.price;
+        const change = prev ? ((p.price - prev) / prev) * 100 : undefined;
+        return { date: p.date, price: p.price, change };
+      });
     }
 
     const historical: MergedPoint[] = data.map((p) => ({ date: p.date, price: p.price }));
@@ -248,7 +259,7 @@ export default function HeroChart({ product, plan, getToken, isSignedIn, onNeedA
                   range === item.id ? "bg-surface text-ink ring-1 ring-line shadow-xs" : "text-muted hover:text-ink",
                 )}
               >
-                {item.id}
+                {item.id === "ALL" ? "All" : item.id}
               </button>
             ))}
           </div>
@@ -320,6 +331,10 @@ export default function HeroChart({ product, plan, getToken, isSignedIn, onNeedA
           {up ? <TrendingUp size={16} strokeWidth={1.8} aria-hidden="true" /> : <TrendingDown size={16} strokeWidth={1.8} aria-hidden="true" />}
           <span>{signedPct(product.change)}</span>
           <span className="font-medium text-muted">oxirgi oyga nisbatan</span>
+          {product.previousPrice ? (
+            <span className="font-medium text-muted">· oldingi {formatPrice(product.previousPrice)}</span>
+          ) : null}
+          {product.month ? <span className="font-medium text-muted">· {product.month}</span> : null}
         </p>
       </div>
 
@@ -393,6 +408,9 @@ export default function HeroChart({ product, plan, getToken, isSignedIn, onNeedA
                       </p>
                     )}
                     <p className="text-[12px] capitalize text-muted mt-0.5">{monthLabel(point.date)}</p>
+                    {point.change != null && (
+                      <p className="tabular text-[12px] text-muted">Oylik o‘zgarish: {signedPct(point.change)}</p>
+                    )}
                   </div>
                 );
               }}

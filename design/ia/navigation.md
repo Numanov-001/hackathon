@@ -2,16 +2,19 @@
 
 One level. The same words appear in the top bar, the section title, and the primary action.
 
-- **Bozor** — market overview: selected crop chart, top products, news. Open without an account.
-- **P2P** — buy and sell ads, cheapest first. Each row shows amount and place. Phone numbers stay off the public response and the client bundle. Starter and Business see them after a verified Clerk session. Posting needs that paid plan and a phone number.
-- **Mahsulotlar** — all tracked crops with last price and change.
-- **Kirish** — Gmail / Google. One account. No seller or buyer role.
-- **Profil** — name, phone, region. Email comes from Gmail.
-- **Obuna** — Bepul (phones closed), Starter 199 000 so‘m/oy, Business 299 000 so‘m/oy, Custom by agreement. Choosing a plan opens the account. Click and Payme are not connected. The plan is stored on the server, not in the browser.
+- **Bozor** — SIAT 1308 market dashboard: current prices, history, analytics, forecast (Premium), P2P preview, Smart Match, logistics, alerts.
+- **P2P** — Sotaman / Sotib olaman. Phone numbers stay off the public response. Paid plans see them after Clerk session.
+- **Mahsulotlar** — catalog: sabzavot, meva (when listed), don, truba, optom.
+- **Obuna** — FREE / PRO / BUSINESS. Paid plans wait for admin or a real payment provider.
+- **Qidiruv** — grouped: Mahsulotlar, P2P, Bozor, Transport.
+- **Profil** — name, email, role, subscription, listings, requests, alerts.
+- **Admin** — `/admin` only when server role is admin. Dashboard, Users, Subscriptions, Products, Market Data, P2P, Transport, Forecasts, Alerts, Settings.
+
+Hisob / accounting is not in the product.
 
 ### Guidelines
 
 - Noun labels, present tense.
-- Bozor is the jury demo home. Keep it an overview, not a full terminal.
+- Bozor is home: DATA → ANALYTICS → FORECAST → TRADING → LOGISTICS.
 - Do not ask users to pick Fermer, Xaridor, or Sotuvchi.
-- “Ask” means a sell offer. “Bid” means a buy offer. Spell both out in the publish form.
+- Users cannot assign themselves Admin or paid Premium; admin activates plans.

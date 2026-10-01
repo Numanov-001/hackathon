@@ -10,6 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from app.models import Offer, OfferStatus, OrderType, PriceBar, Product, Region, User, UserRole
+from app.services.siat_parse import SIAT_CROPS
 
 SPECS = [
     {"slug": "pomidor", "name": "Pomidor", "category": "sabzavot", "unit": "kg", "base": 9200, "seasonal": 2800, "phase": 0.0, "trend": 0.04, "volume": 18000},
@@ -235,6 +236,9 @@ def list_catalog(db: Session) -> list[dict]:
     products = list(
         db.execute(select(Product).where(Product.slug.is_not(None)).order_by(Product.id)).scalars()
     )
+    from app.services.price_analytics import catalog_quotes
+
+    siat_map = {row["id"]: row for row in catalog_quotes(db)}
     payload: list[dict] = []
     for product in products:
         bars = list(
@@ -254,18 +258,28 @@ def list_catalog(db: Session) -> list[dict]:
         last = chart[-1]["price"] if chart else 0
         prev = chart[-2]["price"] if len(chart) > 1 else last
         change = round(((last - prev) / prev) * 100, 1) if prev else 0
-        payload.append(
-            {
-                "id": product.slug,
-                "name": product.name,
-                "category": product.category,
-                "unit": product.unit,
-                "image": f"/products/{product.slug}.jpg?v=2",
-                "price": last,
-                "change": change,
-                "chartData": chart,
-            }
-        )
+        item = {
+            "id": product.slug,
+            "name": product.name,
+            "category": product.category,
+            "unit": product.unit,
+            "image": f"/products/{product.slug}.jpg?v=2",
+            "price": last,
+            "change": change,
+            "chartData": chart,
+        }
+        overlay = siat_map.get(product.slug)
+        if overlay:
+            item.update(overlay)
+        elif product.slug in SIAT_CROPS:
+            item["price"] = 0
+            item["change"] = 0
+            item["chartData"] = []
+        payload.append(item)
+    seen = {item["id"] for item in payload}
+    for slug, row in siat_map.items():
+        if slug not in seen:
+            payload.append(row)
     return payload
 
 

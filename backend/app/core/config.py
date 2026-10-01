@@ -25,13 +25,17 @@ class Settings(BaseSettings):
 
     database_url: str = "sqlite:///./bozor_analitika.db"
 
-    cors_origins: str = "http://localhost:5173"
+    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
     clerk_publishable_key: str = ""
 
     anthropic_api_key: str = ""
     anthropic_model: str = "claude-sonnet-4-5"
     chat_rate_limit_per_minute: int = 10
+
+    admin_clerk_user_ids: str = ""
+    admin_emails: str = ""
+    siat_refresh_minutes: int = 360
 
     rec_price_weight: float = 0.5
     rec_location_weight: float = 0.3

@@ -5,10 +5,17 @@ async function readError(res) {
   try {
     const body = JSON.parse(text);
     if (body && typeof body.detail === "string") return body.detail;
+    if (Array.isArray(body?.detail)) {
+      const first = body.detail[0];
+      if (first && typeof first.msg === "string") return first.msg;
+    }
   } catch {
     /* keep the raw body */
   }
-  return text || "So‘rov bajarilmadi.";
+  if (!text || /proxy error|ECONNREFUSED|Bad Gateway/i.test(text)) {
+    return "Server ishlamayapti. Backendni yoqing (port 8000).";
+  }
+  return text.slice(0, 200);
 }
 
 function headers(token) {
@@ -17,20 +24,43 @@ function headers(token) {
   return next;
 }
 
+async function request(path, init) {
+  let res;
+  try {
+    res = await fetch(`${API}${path}`, init);
+  } catch {
+    throw new Error("Server ishlamayapti. Backendni yoqing (port 8000).");
+  }
+  if (!res.ok) throw new Error(await readError(res));
+  const text = await res.text();
+  return text ? JSON.parse(text) : {};
+}
+
 export async function getJson(path, token) {
-  const res = await fetch(`${API}${path}`, {
+  return request(path, {
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   });
-  if (!res.ok) throw new Error(await readError(res));
-  return res.json();
 }
 
 export async function postJson(path, body, token) {
-  const res = await fetch(`${API}${path}`, {
+  return request(path, {
     method: "POST",
     headers: headers(token),
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error(await readError(res));
-  return res.json();
+}
+
+export async function patchJson(path, body, token) {
+  return request(path, {
+    method: "PATCH",
+    headers: headers(token),
+    body: JSON.stringify(body),
+  });
+}
+
+export async function deleteJson(path, token) {
+  return request(path, {
+    method: "DELETE",
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
 }

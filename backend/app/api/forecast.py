@@ -9,10 +9,9 @@ from app.models import PriceBar, Subscription
 from app.schemas.forecast import ForecastRead, PredictionRead
 from app.services.forecast_service import forecast_product
 from app.services.prediction_service import predict_price
+from app.services.access import require_premium
 
 router = APIRouter(prefix="/forecast", tags=["forecast"])
-
-PAID = {"starter", "business"}
 
 
 class PredictRequest(BaseModel):
@@ -20,13 +19,8 @@ class PredictRequest(BaseModel):
 
 
 def _require_paid(db: Session, authorization: str | None) -> str:
-    user_id = clerk_user_id(authorization)
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Kirish kerak.")
-    row = db.get(Subscription, user_id)
-    if not row or row.plan not in PAID:
-        raise HTTPException(status_code=403, detail="Prognoz Starter tarifidan.")
-    return user_id
+    account = require_premium(db, authorization)
+    return account.clerk_user_id
 
 
 @router.get("/{product_ref}", response_model=ForecastRead)

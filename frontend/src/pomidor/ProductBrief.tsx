@@ -19,7 +19,9 @@ export default function ProductBrief({ product }: { product: Product }) {
           {unitPhrase(product.unit)} — {formatPrice(product.price)} so‘m
         </p>
         <p className={cn("mt-1 text-sm font-semibold", up ? "text-ask" : "text-bid")}>
-          {signedPct(product.change)} · {monthMove(product)}
+          {signedPct(product.changePercent ?? product.change)} · {monthMove(product)}
+          {product.previousPrice ? ` · oldingi ${formatPrice(product.previousPrice)}` : ""}
+          {product.month ? ` · ${product.month}` : ""}
         </p>
         <p className="mt-3 text-sm leading-normal text-muted">{chartBlurb(product)}</p>
       </div>

@@ -6,6 +6,7 @@ import ProductSearch from "./ProductSearch";
 import { cn } from "./lib/cn";
 import { BRAND_NAME } from "./data/brand";
 import type { NavId, Product } from "./types";
+import type { P2POffer } from "./data/p2p";
 
 const ITEMS: Array<{ id: NavId; label: string; icon: typeof Store }> = [
   { id: "bozor", label: "Bozor", icon: Store },
@@ -24,8 +25,12 @@ type NavbarProps = {
   clerkEnabled: boolean;
   isSignedIn: boolean;
   products: Product[];
+  offers?: P2POffer[];
   onOpenProduct: (id: string) => void;
+  onOpenP2P?: () => void;
   onNeedClerk: () => void;
+  isAdmin?: boolean;
+  onAdmin?: () => void;
 };
 
 function KirishButton({
@@ -69,7 +74,11 @@ export default function Navbar({
   isSignedIn,
   products,
   onOpenProduct,
+  onOpenP2P,
+  offers = [],
   onNeedClerk,
+  isAdmin,
+  onAdmin,
 }: NavbarProps) {
   return (
     <header className="enter-nav sticky top-0 z-40 border-b border-line bg-surface">
@@ -102,8 +111,13 @@ export default function Navbar({
             );
           })}
         </nav>
-        <ProductSearch products={products} onOpenProduct={onOpenProduct} className="hidden min-w-[220px] md:block" />
+        <ProductSearch products={products} offers={offers} onOpenProduct={onOpenProduct} onOpenP2P={onOpenP2P} className="hidden min-w-[220px] md:block" />
         <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+          {isAdmin && (
+            <button type="button" onClick={onAdmin} className="hidden min-h-10 rounded-[6px] px-3 text-sm font-medium text-accent hover:bg-soft lg:inline-flex">
+              Admin panel
+            </button>
+          )}
           <div className="hidden h-8 w-px bg-line sm:block" />
           {isSignedIn && clerkEnabled ? (
             <UserButton />
@@ -120,7 +134,9 @@ export default function Navbar({
         <div className="border-t border-line bg-surface px-3 py-3 lg:hidden">
           <ProductSearch
             products={products}
+            offers={offers}
             onOpenProduct={(id) => { onOpenProduct(id); onMenu(false); }}
+            onOpenP2P={() => { onOpenP2P?.(); onMenu(false); }}
             className="mb-3 max-w-none md:hidden"
           />
           <div className="grid gap-1">
